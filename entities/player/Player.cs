@@ -3,6 +3,7 @@ using System;
 using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
 
+[GlobalClass]
 public partial class Player : CharacterBody3D
 {
     public enum State {
@@ -17,6 +18,7 @@ public partial class Player : CharacterBody3D
         ClimbUp,
         ClimbJump,
         Swimming,
+        SwimDash,
         Gliding,
         Ragdoll,
         Shielding,
@@ -30,7 +32,11 @@ public partial class Player : CharacterBody3D
 
     private float GRAVITY = (float)ProjectSettings.GetSetting("physics/3d/default_gravity");
 
+    [Export]
     public float GAMEPAD_LOOK_SPEED = (float)ProjectSettings.GetSetting("settings/gamepad/look_speed");
+
+    [Export]
+    public float MOUSE_LOOK_SPEED = (float)ProjectSettings.GetSetting("settings/mouse/look_speed");
 
     private Vector2 look_dir;
     private const float LOOK_DIR_MOVEMENT_CHANGE_SPEED = 1.75f;
@@ -53,7 +59,8 @@ public partial class Player : CharacterBody3D
     private float PLAYER_WALK_SPEED = 4.5f;
     private float PLAYER_SPRINT_SPEED = 8.0f;
     private float PLAYER_TIRED_SPEED = 3.0f;
-    private float PLAYER_SWIM_SPEED = 3.25f;
+    private float PLAYER_SWIM_SPEED = 1.4f;
+    private float PLAYER_SWIM_DASH_SPEED = 12.0f;
     private float PLAYER_CLIMB_SPEED = 1.25f;
     private float PLAYER_SHIELD_SPEED = 2.75f;
     private float PLAYER_MOVE_ALPHA = 0.001f;
@@ -61,8 +68,10 @@ public partial class Player : CharacterBody3D
     private float PLAYER_WATER_ALPHA = 0.05f;
     private float PLAYER_GLIDE_ALPHA = 0.08f;
     private float PLAYER_CLIMB_JUMP_ALPHA = 0.01f;
+    private float PLAYER_SWIM_DASH_ALPHA = 0.01f;
     private float PLAYER_SPRINT_STAMINA = 12.0f;
-    private float PLAYER_SWIM_STAMINA = 10.0f;
+    private float PLAYER_SWIM_STAMINA = 2.75f;
+    private float PLAYER_SWIM_DASH_STAMINA = 4.25f;
     private float PLAYER_GLIDE_MIN_STAMINA = 4.0f;
     private float PLAYER_GLIDE_MAX_STAMINA = 8.0f;
     private float PLAYER_CLIMB_STAMINA = 4.5f;
@@ -116,6 +125,7 @@ public partial class Player : CharacterBody3D
 
     private Area3D in_water_area = null;
     private Area3D should_float_area = null;
+    private Area3D in_death_liquid_area = null;
     private float WATER_BUOYANCY_AMOUNT = 1.0f;
     private float GLIDE_MAX_FALL_SPEED = 1.45f;
 
@@ -133,6 +143,8 @@ public partial class Player : CharacterBody3D
     private int bodies_of_floating = 0;
 
     private Area3D z_lock_check = null;
+
+    private AnimationTree animation_tree = null;
 
     private Label dbg_state_label = null;
     private Label dbg_stamina_label = null;
@@ -194,6 +206,10 @@ public partial class Player : CharacterBody3D
         should_float_area.AreaEntered += (_) => bodies_of_floating += 1;
         should_float_area.AreaExited += (_) => bodies_of_floating -= 1;
 
+        in_death_liquid_area = GetNode<Area3D>("InDeathLiquidDetector");
+
+        in_death_liquid_area.AreaEntered += (_) => state = State.Drowning;
+
         wall_detector = GetNode<RayCast3D>("CharacterBase/WallDetector");
         climb_up_detector = GetNode<RayCast3D>("CharacterBase/ClimbUpDetector");
 
@@ -202,12 +218,29 @@ public partial class Player : CharacterBody3D
 
         z_lock_check = GetNode<Area3D>("CharacterBase/ZLockCheck");
 
+        animation_tree = GetNode<AnimationTree>("CharacterBase/AnimationTree");
+
         dbg_state_label = GetNode<Label>("State");
         dbg_stamina_label = GetNode<Label>("Stamina");
 
         current_stamina = max_stamina;
         stamina_mesh.Visible = false;
     }
+
+    public override void _Input(InputEvent @event)
+    {
+        base._Input(@event);
+
+        if (@event.IsClass("InputEventMouseMotion")) {
+            var motion = (InputEventMouseMotion)@event;
+
+            var look_delta = -motion.Relative * 0.001f * MOUSE_LOOK_SPEED;
+            look_dir += look_delta;
+
+            look_dir.Y = Math.Clamp(look_dir.Y, (float)-Math.PI / 3.0f, (float)Math.PI / 4.0f);
+        }
+    }
+
 
     public override void _Process(double delta)
     {
@@ -374,6 +407,29 @@ public partial class Player : CharacterBody3D
         stamina_shader.SetShaderParameter("green_percentage", green_stamina_percentage);
 
         stamina_shader.SetShaderParameter("green_flash_amount", green_flash);
+
+        animation_tree.Set("parameters/conditions/grounded", IsOnFloor());
+        animation_tree.Set("parameters/conditions/falling", state == State.Falling);
+        animation_tree.Set("parameters/conditions/jumped", state == State.Jumped);
+
+        switch (state) {
+            case State.Idle:
+            case State.Walking:
+                animation_tree.Set("parameters/Ground/blend_position", movement.Length() / 2.0f);
+                break;
+
+            case State.Sprinting:
+                if (IsTired()) {
+                    animation_tree.Set("parameters/Ground/blend_position", movement.Length() / 2.0f);
+                }
+                else {
+                    animation_tree.Set("parameters/Ground/blend_position", 1.0f);
+                }
+                break;
+
+            default:
+                break;
+        }
     }
 
     public override void _PhysicsProcess(double delta)
@@ -384,7 +440,7 @@ public partial class Player : CharacterBody3D
 
         var climb_up = !climb_up_detector.IsColliding();
 
-        var colliding_with_wall = wall_detector.IsColliding() || !climb_up;
+        var colliding_with_wall = wall_detector.IsColliding();
 
         if (colliding_with_wall) {
             moving_into_wall = movement.Y < 0.0f;
@@ -679,6 +735,41 @@ public partial class Player : CharacterBody3D
                     if (moving_into_wall) {
                         state = State.Climbing;
                     }
+                    else if (sprint_jump) {
+                        state = State.SwimDash;
+
+                        var dash_amount = -character_base.Basis.Z;
+                        dash_amount *= PLAYER_SWIM_DASH_SPEED;
+
+                        Velocity = dash_amount;
+
+                        current_stamina -= PLAYER_SWIM_DASH_STAMINA;
+                    }
+                }
+                break;
+            
+            case State.SwimDash:
+                if (colliding_with_wall) {
+                    state = State.Climbing;
+                }
+                else if (!in_water) {
+                    if (!IsOnFloor()) {
+                        state = State.Falling;
+                    }
+                    if (moving) {
+                        if (sprinting) {
+                            state = State.Sprinting;
+                        }
+                        else {
+                            state = State.Walking;
+                        }
+                    }
+                    else {
+                        state = State.Idle;
+                    }
+                }
+                else if (Velocity.Length() <= PLAYER_SWIM_SPEED) {
+                    state = State.Swimming;
                 }
                 break;
 
@@ -804,6 +895,7 @@ public partial class Player : CharacterBody3D
             case State.Sprinting:
                 apply_gravity = true;
 
+                movement_amount = -character_base.Basis.Z;
                 movement_amount *= PLAYER_SPRINT_SPEED;
                 Velocity = Velocity.Lerp(movement_amount, 1.0f - (float)Math.Pow(PLAYER_MOVE_ALPHA, delta));
 
@@ -917,6 +1009,15 @@ public partial class Player : CharacterBody3D
                 }
 
                 stamina_can_recover = false;
+
+                break;
+
+            case State.SwimDash:
+                apply_gravity = false;
+
+                saved_grav = 0.0f;
+
+                Velocity = Velocity.Lerp(Vector3.Zero, 1.0f - (float)Math.Pow(PLAYER_SWIM_DASH_ALPHA, delta));
 
                 break;
 

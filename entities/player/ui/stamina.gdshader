@@ -8,6 +8,7 @@ uniform vec3 green_flash_color: source_color;
 uniform vec3 red_bright_color: source_color;
 uniform vec3 red_dark_color: source_color;
 uniform vec3 base_color: source_color;
+uniform vec3 outline_color: source_color;
 
 uniform float green_percentage;
 uniform float red_percentage;
@@ -27,7 +28,8 @@ void vertex() {
 }
 
 void fragment() {
-	ALPHA = texture(mask, UV).r;
+    vec2 info = texture(mask, UV).rg;
+	ALPHA = info.r;
 
     if (ALPHA < 0.005) {
         discard;
@@ -52,6 +54,8 @@ void fragment() {
     else {
         color = base_color;
     }
+
+    color = mix(color, outline_color, info.g);
 
     ALBEDO = color;
 }

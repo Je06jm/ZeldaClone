@@ -1,14 +1,69 @@
-[gd_scene load_steps=10 format=3 uid="uid://6v5asdefc2li"]
+[gd_scene load_steps=25 format=3 uid="uid://6v5asdefc2li"]
 
 [ext_resource type="Script" uid="uid://o454nvjk04an" path="res://entities/player/Player.cs" id="1_symyc"]
 [ext_resource type="Shader" uid="uid://ck7gtia3tbp6v" path="res://entities/player/ui/stamina.gdshader" id="2_abrql"]
+[ext_resource type="PackedScene" uid="uid://kod0awm1ha4o" path="res://entities/player/model/model/gobot.glb" id="2_bls4j"]
 [ext_resource type="Texture2D" uid="uid://cfsnjm4akumlx" path="res://entities/player/ui/stamina_base.png" id="3_sglur"]
+[ext_resource type="Script" uid="uid://bqi3a10qbmrh2" path="res://entities/player/pause_ui.gd" id="5_fkugw"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_sfv1e"]
 
 [sub_resource type="CylinderShape3D" id="CylinderShape3D_fkugw"]
 height = 12.0
 radius = 3.62598
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_qiwj3"]
+animation = &"Fall"
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_bls4j"]
+animation = &"Idle"
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_fkugw"]
+animation = &"Walk"
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_8fjmc"]
+animation = &"Run"
+
+[sub_resource type="AnimationNodeBlendSpace1D" id="AnimationNodeBlendSpace1D_qiwj3"]
+blend_point_0/node = SubResource("AnimationNodeAnimation_bls4j")
+blend_point_0/pos = 0.0
+blend_point_1/node = SubResource("AnimationNodeAnimation_fkugw")
+blend_point_1/pos = 0.5
+blend_point_2/node = SubResource("AnimationNodeAnimation_8fjmc")
+blend_point_2/pos = 1.0
+min_space = 0.0
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_26q78"]
+animation = &"Jump"
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_bectd"]
+advance_mode = 2
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_wvtmh"]
+advance_mode = 2
+advance_condition = &"jumped"
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_7thud"]
+xfade_time = 0.4
+advance_mode = 2
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_a1qjk"]
+xfade_time = 0.25
+advance_mode = 2
+advance_condition = &"falling"
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_j3ovn"]
+advance_mode = 2
+advance_condition = &"grounded"
+
+[sub_resource type="AnimationNodeStateMachine" id="AnimationNodeStateMachine_bls4j"]
+states/Fall/node = SubResource("AnimationNodeAnimation_qiwj3")
+states/Fall/position = Vector2(510, 211)
+states/Ground/node = SubResource("AnimationNodeBlendSpace1D_qiwj3")
+states/Ground/position = Vector2(394, 100)
+states/Jump/node = SubResource("AnimationNodeAnimation_26q78")
+states/Jump/position = Vector2(394, 211)
+transitions = ["Start", "Ground", SubResource("AnimationNodeStateMachineTransition_bectd"), "Ground", "Jump", SubResource("AnimationNodeStateMachineTransition_wvtmh"), "Jump", "Fall", SubResource("AnimationNodeStateMachineTransition_7thud"), "Ground", "Fall", SubResource("AnimationNodeStateMachineTransition_a1qjk"), "Fall", "Ground", SubResource("AnimationNodeStateMachineTransition_j3ovn")]
 
 [sub_resource type="QuadMesh" id="QuadMesh_sglur"]
 
@@ -20,7 +75,8 @@ shader_parameter/green_color = Color(0.0866691, 0.734375, 0.135621, 1)
 shader_parameter/green_flash_color = Color(0.580392, 1, 0.0705882, 1)
 shader_parameter/red_bright_color = Color(0.957031, 0.433601, 0.440741, 1)
 shader_parameter/red_dark_color = Color(0.546875, 0.0577105, 0.00824438, 1)
-shader_parameter/base_color = Color(0.273438, 0.273438, 0.273438, 1)
+shader_parameter/base_color = Color(0.344076, 0.344076, 0.344076, 1)
+shader_parameter/outline_color = Color(0.27451, 0.27451, 0.27451, 1)
 shader_parameter/green_percentage = 0.43
 shader_parameter/red_percentage = 0.56
 shader_parameter/green_flash_amount = 0.0
@@ -32,6 +88,8 @@ height = 1.2619
 [sub_resource type="CylinderShape3D" id="CylinderShape3D_bls4j"]
 height = 1.01465
 
+[sub_resource type="SphereShape3D" id="SphereShape3D_bls4j"]
+
 [node name="Player" type="CharacterBody3D"]
 collision_layer = 65536
 collision_mask = 3
@@ -41,6 +99,7 @@ script = ExtResource("1_symyc")
 shape = SubResource("CapsuleShape3D_sfv1e")
 
 [node name="CSGCylinder3D" type="CSGCylinder3D" parent="CharacterBase"]
+visible = false
 
 [node name="CSGBox3D" type="CSGBox3D" parent="CharacterBase/CSGCylinder3D"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.474389, -0.419037)
@@ -68,6 +127,49 @@ monitorable = false
 [node name="CollisionShape3D" type="CollisionShape3D" parent="CharacterBase/ZLockCheck"]
 transform = Transform3D(0.999985, 0.00548031, 0, 2.39552e-10, -4.37107e-08, 1, 0.00548031, -0.999985, -4.37114e-08, -0.0109606, -8.9407e-08, -6.00003)
 shape = SubResource("CylinderShape3D_fkugw")
+
+[node name="gobot" parent="CharacterBase" instance=ExtResource("2_bls4j")]
+transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 0, -0.992052, 0)
+
+[node name="Skeleton3D" parent="CharacterBase/gobot/Armature" index="0"]
+bones/0/position = Vector3(0.124434, 0.102022, 0.0648027)
+bones/0/rotation = Quaternion(0.794556, 0.0993919, -0.13534, 0.58351)
+bones/1/position = Vector3(-0.109464, 0.0991959, -0.0482467)
+bones/1/rotation = Quaternion(0.684474, -0.301808, 0.37941, 0.544477)
+bones/2/position = Vector3(0, 0.360827, 0)
+bones/2/rotation = Quaternion(0.066254, -0.0216436, 0.00165754, 0.997567)
+bones/3/rotation = Quaternion(1, -5.54519e-11, -7.54854e-08, -3.59836e-09)
+bones/4/rotation = Quaternion(-0.391169, -0.18164, -0.0521783, 0.900706)
+bones/5/rotation = Quaternion(0.296145, 1.0881e-06, -1.01154e-05, 0.955143)
+bones/6/rotation = Quaternion(-0.227085, 0.4903, 0.18366, 0.821162)
+bones/7/rotation = Quaternion(0.451048, -1.03457e-06, 1.54403e-05, 0.8925)
+bones/8/rotation = Quaternion(-0.690924, -0.260067, -0.61528, 0.27644)
+bones/9/rotation = Quaternion(2.16703e-07, 5.36079e-07, -0.396913, 0.917856)
+bones/10/rotation = Quaternion(-0.289732, -0.637458, -0.217438, 0.680017)
+bones/11/rotation = Quaternion(0.487906, -0.0174399, 0.00854542, 0.87268)
+bones/12/rotation = Quaternion(-0.371224, -0.00197697, 0.00585366, 0.928523)
+bones/13/rotation = Quaternion(-0.502333, 1.50053e-05, -2.85065e-05, 0.864674)
+bones/14/rotation = Quaternion(-0.371224, -0.00197698, 0.00585369, 0.928523)
+bones/15/rotation = Quaternion(-0.502333, 1.50003e-05, -2.85076e-05, 0.864674)
+bones/16/rotation = Quaternion(-0.623894, 0.273002, 0.683, 0.264078)
+bones/17/rotation = Quaternion(2.32168e-07, -5.82486e-07, 0.386511, 0.922285)
+bones/18/rotation = Quaternion(-0.289732, 0.637458, 0.217438, 0.680017)
+bones/19/rotation = Quaternion(0.487906, 0.0174399, -0.00854541, 0.87268)
+bones/20/rotation = Quaternion(-0.371224, 0.00197697, -0.00585365, 0.928523)
+bones/21/rotation = Quaternion(-0.502333, -1.49885e-05, 2.84989e-05, 0.864674)
+bones/22/rotation = Quaternion(-0.371224, 0.00197698, -0.00585368, 0.928523)
+bones/23/rotation = Quaternion(-0.502333, -1.50036e-05, 2.84925e-05, 0.864674)
+bones/24/position = Vector3(2.67078e-10, 0.189977, -8.12312e-09)
+bones/24/rotation = Quaternion(-0.0674349, -0.000555502, 3.75517e-05, 0.997724)
+
+[node name="AnimationTree" type="AnimationTree" parent="CharacterBase"]
+root_node = NodePath("../gobot")
+tree_root = SubResource("AnimationNodeStateMachine_bls4j")
+anim_player = NodePath("../gobot/AnimationPlayer")
+parameters/conditions/falling = false
+parameters/conditions/grounded = false
+parameters/conditions/jumped = false
+parameters/Ground/blend_position = 0
 
 [node name="CameraBase" type="Node3D" parent="."]
 
@@ -109,6 +211,14 @@ collision_mask = 4
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.492676, 0)
 shape = SubResource("CylinderShape3D_bls4j")
 
+[node name="InDeathLiquidDetector" type="Area3D" parent="."]
+collision_layer = 0
+collision_mask = 8
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="InDeathLiquidDetector"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.516294, 0)
+shape = SubResource("SphereShape3D_bls4j")
+
 [node name="State" type="Label" parent="."]
 offset_right = 40.0
 offset_bottom = 23.0
@@ -119,3 +229,203 @@ offset_top = 20.0
 offset_right = 40.0
 offset_bottom = 43.0
 text = "100"
+
+[node name="PauseUI" type="Control" parent="." node_paths=PackedStringArray("player")]
+process_mode = 3
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+script = ExtResource("5_fkugw")
+player = NodePath("..")
+
+[node name="Background" type="ColorRect" parent="PauseUI"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.111197, 0.111197, 0.111197, 0.414)
+
+[node name="Main" type="Control" parent="PauseUI"]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="PauseUI/Main"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 200
+theme_override_constants/margin_top = 150
+theme_override_constants/margin_right = 200
+
+[node name="VBoxContainer" type="VBoxContainer" parent="PauseUI/Main/MarginContainer"]
+layout_mode = 2
+
+[node name="Resume" type="Button" parent="PauseUI/Main/MarginContainer/VBoxContainer"]
+layout_mode = 2
+text = "Resume"
+
+[node name="Settings" type="Button" parent="PauseUI/Main/MarginContainer/VBoxContainer"]
+layout_mode = 2
+text = "Settings"
+
+[node name="Quit" type="Button" parent="PauseUI/Main/MarginContainer/VBoxContainer"]
+layout_mode = 2
+text = "Quit"
+
+[node name="Settings" type="Control" parent="PauseUI"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="PauseUI/Settings"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="ScrollContainer" type="ScrollContainer" parent="PauseUI/Settings/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="MarginContainer" type="MarginContainer" parent="PauseUI/Settings/VBoxContainer/ScrollContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/margin_left = 100
+theme_override_constants/margin_top = 200
+theme_override_constants/margin_right = 100
+
+[node name="VBoxContainer" type="VBoxContainer" parent="PauseUI/Settings/VBoxContainer/ScrollContainer/MarginContainer"]
+layout_mode = 2
+
+[node name="GridContainer" type="GridContainer" parent="PauseUI/Settings/VBoxContainer/ScrollContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+columns = 3
+
+[node name="ControllerLabel" type="Label" parent="PauseUI/Settings/VBoxContainer/ScrollContainer/MarginContainer/VBoxContainer/GridContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Controller Look Speed"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="ControllerSlider" type="HSlider" parent="PauseUI/Settings/VBoxContainer/ScrollContainer/MarginContainer/VBoxContainer/GridContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+min_value = 0.01
+max_value = 2.0
+step = 0.1
+value = 1.01
+
+[node name="ControllerValue" type="LineEdit" parent="PauseUI/Settings/VBoxContainer/ScrollContainer/MarginContainer/VBoxContainer/GridContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+text = "1.0"
+virtual_keyboard_type = 2
+
+[node name="MouseLabel" type="Label" parent="PauseUI/Settings/VBoxContainer/ScrollContainer/MarginContainer/VBoxContainer/GridContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Mouse Look Speed"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="MouseSlider" type="HSlider" parent="PauseUI/Settings/VBoxContainer/ScrollContainer/MarginContainer/VBoxContainer/GridContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+min_value = 0.01
+max_value = 5.0
+step = 0.1
+value = 1.01
+
+[node name="MouseValue" type="LineEdit" parent="PauseUI/Settings/VBoxContainer/ScrollContainer/MarginContainer/VBoxContainer/GridContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+text = "1.0"
+virtual_keyboard_type = 2
+
+[node name="Spacer" type="Control" parent="PauseUI/Settings/VBoxContainer/ScrollContainer/MarginContainer/VBoxContainer"]
+custom_minimum_size = Vector2(0, 25)
+layout_mode = 2
+
+[node name="Graphics" type="MenuButton" parent="PauseUI/Settings/VBoxContainer/ScrollContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+text = "Graphic Settings"
+flat = false
+item_count = 3
+popup/item_0/text = "Low"
+popup/item_0/id = 0
+popup/item_1/text = "Medium"
+popup/item_1/id = 1
+popup/item_2/text = "High"
+popup/item_2/id = 2
+
+[node name="FSR" type="MenuButton" parent="PauseUI/Settings/VBoxContainer/ScrollContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+text = "FSR Upscaling"
+flat = false
+item_count = 3
+popup/item_0/text = "None"
+popup/item_0/id = 0
+popup/item_1/text = "FSR 1"
+popup/item_1/id = 1
+popup/item_2/text = "FSR 2"
+popup/item_2/id = 2
+
+[node name="Scaling" type="MenuButton" parent="PauseUI/Settings/VBoxContainer/ScrollContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+text = "Scaling"
+flat = false
+item_count = 4
+popup/item_0/text = "Performance"
+popup/item_0/id = 0
+popup/item_1/text = "Balanced"
+popup/item_1/id = 1
+popup/item_2/text = "Quality"
+popup/item_2/id = 2
+popup/item_3/text = "Ultra Quality"
+popup/item_3/id = 3
+
+[node name="Fullscreen" type="CheckButton" parent="PauseUI/Settings/VBoxContainer/ScrollContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+text = "Fullscreen"
+alignment = 1
+
+[node name="Done" type="Button" parent="PauseUI/Settings/VBoxContainer"]
+layout_mode = 2
+text = "Done"
+
+[connection signal="pressed" from="PauseUI/Main/MarginContainer/VBoxContainer/Resume" to="PauseUI" method="_on_resume_pressed"]
+[connection signal="pressed" from="PauseUI/Main/MarginContainer/VBoxContainer/Settings" to="PauseUI" method="_on_settings_pressed"]
+[connection signal="pressed" from="PauseUI/Main/MarginContainer/VBoxContainer/Quit" to="PauseUI" method="_on_quit_pressed"]
+[connection signal="drag_ended" from="PauseUI/Settings/VBoxContainer/ScrollContainer/MarginContainer/VBoxContainer/GridContainer/ControllerSlider" to="PauseUI" method="_on_controller_slider_drag_ended"]
+[connection signal="text_submitted" from="PauseUI/Settings/VBoxContainer/ScrollContainer/MarginContainer/VBoxContainer/GridContainer/ControllerValue" to="PauseUI" method="_on_controller_value_text_submitted"]
+[connection signal="drag_ended" from="PauseUI/Settings/VBoxContainer/ScrollContainer/MarginContainer/VBoxContainer/GridContainer/MouseSlider" to="PauseUI" method="_on_mouse_slider_drag_ended"]
+[connection signal="text_submitted" from="PauseUI/Settings/VBoxContainer/ScrollContainer/MarginContainer/VBoxContainer/GridContainer/MouseValue" to="PauseUI" method="_on_mouse_value_text_submitted"]
+[connection signal="toggled" from="PauseUI/Settings/VBoxContainer/ScrollContainer/MarginContainer/VBoxContainer/Fullscreen" to="PauseUI" method="_on_fullscreen_toggled"]
+[connection signal="pressed" from="PauseUI/Settings/VBoxContainer/Done" to="PauseUI" method="_on_done_pressed"]
+
+[editable path="CharacterBase/gobot"]
