@@ -1,0 +1,121 @@
+[gd_scene load_steps=10 format=3 uid="uid://6v5asdefc2li"]
+
+[ext_resource type="Script" uid="uid://o454nvjk04an" path="res://entities/player/Player.cs" id="1_symyc"]
+[ext_resource type="Shader" uid="uid://ck7gtia3tbp6v" path="res://entities/player/ui/stamina.gdshader" id="2_abrql"]
+[ext_resource type="Texture2D" uid="uid://cfsnjm4akumlx" path="res://entities/player/ui/stamina_base.png" id="3_sglur"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_sfv1e"]
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_fkugw"]
+height = 12.0
+radius = 3.62598
+
+[sub_resource type="QuadMesh" id="QuadMesh_sglur"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_bls4j"]
+render_priority = 0
+shader = ExtResource("2_abrql")
+shader_parameter/mask = ExtResource("3_sglur")
+shader_parameter/green_color = Color(0.0866691, 0.734375, 0.135621, 1)
+shader_parameter/green_flash_color = Color(0.580392, 1, 0.0705882, 1)
+shader_parameter/red_bright_color = Color(0.957031, 0.433601, 0.440741, 1)
+shader_parameter/red_dark_color = Color(0.546875, 0.0577105, 0.00824438, 1)
+shader_parameter/base_color = Color(0.273438, 0.273438, 0.273438, 1)
+shader_parameter/green_percentage = 0.43
+shader_parameter/red_percentage = 0.56
+shader_parameter/green_flash_amount = 0.0
+shader_parameter/red_flash_speed = 17.0
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_sglur"]
+height = 1.2619
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_bls4j"]
+height = 1.01465
+
+[node name="Player" type="CharacterBody3D"]
+collision_layer = 65536
+collision_mask = 3
+script = ExtResource("1_symyc")
+
+[node name="CharacterBase" type="CollisionShape3D" parent="."]
+shape = SubResource("CapsuleShape3D_sfv1e")
+
+[node name="CSGCylinder3D" type="CSGCylinder3D" parent="CharacterBase"]
+
+[node name="CSGBox3D" type="CSGBox3D" parent="CharacterBase/CSGCylinder3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.474389, -0.419037)
+size = Vector3(1, 1, 0.953064)
+
+[node name="WallDetector" type="RayCast3D" parent="CharacterBase"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.0191197, 0)
+target_position = Vector3(0, 0, -1.5)
+
+[node name="WallSnapPoint" type="Marker3D" parent="CharacterBase/WallDetector"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.787)
+
+[node name="FixedSnapPoint" type="Marker3D" parent="CharacterBase/WallDetector/WallSnapPoint"]
+
+[node name="ClimbUpDetector" type="RayCast3D" parent="CharacterBase"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
+target_position = Vector3(0, 0, -1.5)
+
+[node name="ZLockCheck" type="Area3D" parent="CharacterBase"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
+collision_layer = 0
+collision_mask = 16
+monitorable = false
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="CharacterBase/ZLockCheck"]
+transform = Transform3D(0.999985, 0.00548031, 0, 2.39552e-10, -4.37107e-08, 1, 0.00548031, -0.999985, -4.37114e-08, -0.0109606, -8.9407e-08, -6.00003)
+shape = SubResource("CylinderShape3D_fkugw")
+
+[node name="CameraBase" type="Node3D" parent="."]
+
+[node name="CollisionChecker" type="RayCast3D" parent="CameraBase"]
+target_position = Vector3(0, 0, 6.5)
+collision_mask = 15
+
+[node name="Camera3D" type="Camera3D" parent="CameraBase"]
+current = true
+
+[node name="Stamina" type="MeshInstance3D" parent="CameraBase/Camera3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 2.195, -12)
+visible = false
+mesh = SubResource("QuadMesh_sglur")
+skeleton = NodePath("../../..")
+surface_material_override/0 = SubResource("ShaderMaterial_bls4j")
+
+[node name="RecoveryTimeout" type="Timer" parent="CameraBase/Camera3D/Stamina"]
+wait_time = 0.5
+one_shot = true
+
+[node name="HideTimer" type="Timer" parent="CameraBase/Camera3D/Stamina"]
+wait_time = 0.25
+one_shot = true
+
+[node name="InWaterDetector" type="Area3D" parent="."]
+collision_layer = 0
+collision_mask = 4
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="InWaterDetector"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.369049, 0)
+shape = SubResource("CylinderShape3D_sglur")
+
+[node name="WaterFloatDetector" type="Area3D" parent="."]
+collision_layer = 0
+collision_mask = 4
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="WaterFloatDetector"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.492676, 0)
+shape = SubResource("CylinderShape3D_bls4j")
+
+[node name="State" type="Label" parent="."]
+offset_right = 40.0
+offset_bottom = 23.0
+text = "Idle"
+
+[node name="Stamina" type="Label" parent="."]
+offset_top = 20.0
+offset_right = 40.0
+offset_bottom = 43.0
+text = "100"
