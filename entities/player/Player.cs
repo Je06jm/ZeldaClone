@@ -99,7 +99,7 @@ public partial class Player : CharacterBody3D
             return _current_stamina;
         }
         set {
-            stamina_mesh.Visible = true;
+            stamina_item.Visible = true;
             
             _current_stamina = value;
 
@@ -118,7 +118,7 @@ public partial class Player : CharacterBody3D
     private const float STAMINA_RECOVERY_AMOUNT = 15.0f;
     private const float STAMINA_MIN_GREEN_PERCENTAGE = 0.2f;
 
-    private MeshInstance3D stamina_mesh = null;
+    private ColorRect stamina_item = null;
     private ShaderMaterial stamina_shader = null;
     private Timer stamina_timer = null;
     private Timer stamina_hide_timer = null;
@@ -147,7 +147,6 @@ public partial class Player : CharacterBody3D
     private AnimationTree animation_tree = null;
 
     private Label dbg_state_label = null;
-    private Label dbg_stamina_label = null;
 
     private void TempKill() {
         GetTree().ReloadCurrentScene();
@@ -189,13 +188,13 @@ public partial class Player : CharacterBody3D
 
         character_base = GetNode<CollisionShape3D>("CharacterBase");
 
-        stamina_mesh = GetNode<MeshInstance3D>("CameraBase/Camera3D/Stamina");
-        stamina_shader = (ShaderMaterial)stamina_mesh.GetSurfaceOverrideMaterial(0);
-        stamina_timer = GetNode<Timer>("CameraBase/Camera3D/Stamina/RecoveryTimeout");
-        stamina_hide_timer = GetNode<Timer>("CameraBase/Camera3D/Stamina/HideTimer");
+        stamina_item = GetNode<ColorRect>("Stamina");
+        stamina_shader = (ShaderMaterial)stamina_item.Material;
+        stamina_timer = GetNode<Timer>("Stamina/RecoveryTimeout");
+        stamina_hide_timer = GetNode<Timer>("Stamina/HideTimer");
 
         stamina_timer.Timeout += () => _stamina_is_recovering = true;
-        stamina_hide_timer.Timeout += () => stamina_mesh.Visible = false;
+        stamina_hide_timer.Timeout += () => stamina_item.Visible = false;
 
         in_water_area = GetNode<Area3D>("InWaterDetector");
         should_float_area = GetNode<Area3D>("WaterFloatDetector");
@@ -221,10 +220,9 @@ public partial class Player : CharacterBody3D
         animation_tree = GetNode<AnimationTree>("CharacterBase/AnimationTree");
 
         dbg_state_label = GetNode<Label>("State");
-        dbg_stamina_label = GetNode<Label>("Stamina");
 
         current_stamina = max_stamina;
-        stamina_mesh.Visible = false;
+        stamina_item.Visible = false;
     }
 
     public override void _Input(InputEvent @event)
@@ -389,8 +387,6 @@ public partial class Player : CharacterBody3D
         }
 
         _stamina_was_recovering = stamina_can_recover;
-
-        dbg_stamina_label.Text = ((int)current_stamina).ToString();
 
         var cur_stamina_percentage = current_stamina / max_stamina;
         var green_stamina_percentage = cur_stamina_percentage - stamina_removal_rate / max_stamina;

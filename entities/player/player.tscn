@@ -1,4 +1,4 @@
-[gd_scene load_steps=25 format=3 uid="uid://6v5asdefc2li"]
+[gd_scene load_steps=24 format=3 uid="uid://6v5asdefc2li"]
 
 [ext_resource type="Script" uid="uid://o454nvjk04an" path="res://entities/player/Player.cs" id="1_symyc"]
 [ext_resource type="Shader" uid="uid://ck7gtia3tbp6v" path="res://entities/player/ui/stamina.gdshader" id="2_abrql"]
@@ -65,23 +65,6 @@ states/Jump/node = SubResource("AnimationNodeAnimation_26q78")
 states/Jump/position = Vector2(394, 211)
 transitions = ["Start", "Ground", SubResource("AnimationNodeStateMachineTransition_bectd"), "Ground", "Jump", SubResource("AnimationNodeStateMachineTransition_wvtmh"), "Jump", "Fall", SubResource("AnimationNodeStateMachineTransition_7thud"), "Ground", "Fall", SubResource("AnimationNodeStateMachineTransition_a1qjk"), "Fall", "Ground", SubResource("AnimationNodeStateMachineTransition_j3ovn")]
 
-[sub_resource type="QuadMesh" id="QuadMesh_sglur"]
-
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_bls4j"]
-render_priority = 0
-shader = ExtResource("2_abrql")
-shader_parameter/mask = ExtResource("3_sglur")
-shader_parameter/green_color = Color(0.0866691, 0.734375, 0.135621, 1)
-shader_parameter/green_flash_color = Color(0.910072, 1, 0.865135, 1)
-shader_parameter/red_bright_color = Color(0.957031, 0.433601, 0.440741, 1)
-shader_parameter/red_dark_color = Color(0.546875, 0.0577105, 0.00824438, 1)
-shader_parameter/base_color = Color(0.344076, 0.344076, 0.344076, 1)
-shader_parameter/outline_color = Color(0.27451, 0.27451, 0.27451, 1)
-shader_parameter/green_percentage = 0.43
-shader_parameter/red_percentage = 0.56
-shader_parameter/green_flash_amount = 0.0
-shader_parameter/red_flash_speed = 17.0
-
 [sub_resource type="CylinderShape3D" id="CylinderShape3D_sglur"]
 height = 1.2619
 
@@ -89,6 +72,20 @@ height = 1.2619
 height = 1.01465
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_bls4j"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_fkugw"]
+shader = ExtResource("2_abrql")
+shader_parameter/mask = ExtResource("3_sglur")
+shader_parameter/green_color = Color(0.0862745, 0.733333, 0.137255, 1)
+shader_parameter/green_flash_color = Color(0.909804, 1, 0.866667, 1)
+shader_parameter/red_bright_color = Color(0.956863, 0.435294, 0.439216, 1)
+shader_parameter/red_dark_color = Color(0.540383, 0.0579297, 0.00769615, 1)
+shader_parameter/base_color = Color(0.31802, 0.31802, 0.31802, 1)
+shader_parameter/outline_color = Color(0.212305, 0.212305, 0.212305, 1)
+shader_parameter/green_percentage = 1.0
+shader_parameter/red_percentage = 1.0
+shader_parameter/green_flash_amount = 0.0
+shader_parameter/red_flash_speed = 15.0
 
 [node name="Player" type="CharacterBody3D"]
 collision_layer = 65536
@@ -107,7 +104,7 @@ size = Vector3(1, 1, 0.953064)
 
 [node name="WallDetector" type="RayCast3D" parent="CharacterBase"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.0191197, 0)
-target_position = Vector3(0, 0, -1.5)
+target_position = Vector3(0, 0, -2)
 
 [node name="WallSnapPoint" type="Marker3D" parent="CharacterBase/WallDetector"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.787)
@@ -116,7 +113,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.787)
 
 [node name="ClimbUpDetector" type="RayCast3D" parent="CharacterBase"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
-target_position = Vector3(0, 0, -1.5)
+target_position = Vector3(0, 0, -2)
 
 [node name="ZLockCheck" type="Area3D" parent="CharacterBase"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
@@ -136,14 +133,14 @@ bones/0/position = Vector3(0.125361, 0.0989139, 0.0728901)
 bones/0/rotation = Quaternion(0.772549, 0.107691, -0.136221, 0.610749)
 bones/1/position = Vector3(-0.109875, 0.0989111, -0.0510765)
 bones/1/rotation = Quaternion(0.679368, -0.310085, 0.392234, 0.537083)
-bones/2/position = Vector3(0, 0.350945, 0)
-bones/2/rotation = Quaternion(0.0697329, 0.0259472, -0.00181441, 0.997227)
-bones/3/rotation = Quaternion(1, -5.8009e-11, -7.50294e-08, 3.72656e-09)
-bones/4/rotation = Quaternion(-0.492757, -0.135964, -0.0473293, 0.858175)
-bones/5/rotation = Quaternion(0.372562, 1.04312e-06, -1.27163e-05, 0.928007)
-bones/6/rotation = Quaternion(-0.218767, 0.547507, 0.233047, 0.773347)
-bones/7/rotation = Quaternion(0.5168, -9.71591e-07, 1.76936e-05, 0.856106)
-bones/8/rotation = Quaternion(-0.669165, -0.263855, -0.637002, 0.277177)
+bones/2/position = Vector3(0, 0.35494, 0)
+bones/2/rotation = Quaternion(0.0697315, 0.0266817, -0.00186577, 0.997207)
+bones/3/rotation = Quaternion(1, -5.78697e-11, -7.50274e-08, 3.72746e-09)
+bones/4/rotation = Quaternion(-0.464917, -0.136607, -0.0426773, 0.87371)
+bones/5/rotation = Quaternion(0.326788, 1.06396e-06, -1.11707e-05, 0.945098)
+bones/6/rotation = Quaternion(-0.203377, 0.552465, 0.21925, 0.778042)
+bones/7/rotation = Quaternion(0.485277, -1.00576e-06, 1.65902e-05, 0.87436)
+bones/8/rotation = Quaternion(-0.641497, -0.275393, -0.664857, 0.265716)
 bones/9/rotation = Quaternion(2.16937e-07, 5.35541e-07, -0.395029, 0.918669)
 bones/10/rotation = Quaternion(-0.289732, -0.637458, -0.217438, 0.680017)
 bones/11/rotation = Quaternion(0.487906, -0.0174399, 0.00854542, 0.87268)
@@ -151,7 +148,7 @@ bones/12/rotation = Quaternion(-0.371224, -0.00197697, 0.00585366, 0.928523)
 bones/13/rotation = Quaternion(-0.502333, 1.50049e-05, -2.85054e-05, 0.864674)
 bones/14/rotation = Quaternion(-0.371224, -0.00197698, 0.00585369, 0.928523)
 bones/15/rotation = Quaternion(-0.502333, 1.49999e-05, -2.85068e-05, 0.864674)
-bones/16/rotation = Quaternion(-0.646663, 0.273312, 0.659834, 0.267856)
+bones/16/rotation = Quaternion(-0.674113, 0.261685, 0.631764, 0.279226)
 bones/17/rotation = Quaternion(2.27203e-07, -5.84749e-07, 0.395029, 0.918669)
 bones/18/rotation = Quaternion(-0.289732, 0.637458, 0.217438, 0.680017)
 bones/19/rotation = Quaternion(0.487906, 0.0174399, -0.00854541, 0.87268)
@@ -179,21 +176,6 @@ collision_mask = 15
 
 [node name="Camera3D" type="Camera3D" parent="CameraBase"]
 current = true
-
-[node name="Stamina" type="MeshInstance3D" parent="CameraBase/Camera3D"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 2.195, -12)
-visible = false
-mesh = SubResource("QuadMesh_sglur")
-skeleton = NodePath("../../..")
-surface_material_override/0 = SubResource("ShaderMaterial_bls4j")
-
-[node name="RecoveryTimeout" type="Timer" parent="CameraBase/Camera3D/Stamina"]
-wait_time = 0.5
-one_shot = true
-
-[node name="HideTimer" type="Timer" parent="CameraBase/Camera3D/Stamina"]
-wait_time = 0.25
-one_shot = true
 
 [node name="InWaterDetector" type="Area3D" parent="."]
 collision_layer = 0
@@ -224,11 +206,28 @@ offset_right = 40.0
 offset_bottom = 23.0
 text = "Idle"
 
-[node name="Stamina" type="Label" parent="."]
-offset_top = 20.0
-offset_right = 40.0
-offset_bottom = 43.0
-text = "100"
+[node name="Stamina" type="ColorRect" parent="."]
+material = SubResource("ShaderMaterial_fkugw")
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = 39.0
+offset_top = -82.0
+offset_right = 79.0
+offset_bottom = -42.0
+grow_horizontal = 2
+grow_vertical = 2
+scale = Vector2(1.05122, 1.05122)
+
+[node name="RecoveryTimeout" type="Timer" parent="Stamina"]
+wait_time = 0.5
+one_shot = true
+
+[node name="HideTimer" type="Timer" parent="Stamina"]
+wait_time = 0.25
+one_shot = true
 
 [node name="PauseUI" type="Control" parent="." node_paths=PackedStringArray("player")]
 process_mode = 3
