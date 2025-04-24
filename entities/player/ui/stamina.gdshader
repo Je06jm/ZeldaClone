@@ -18,7 +18,7 @@ uniform float red_flash_speed;
 
 void fragment() {
     vec2 info = texture(mask, UV).rg;
-	
+
     vec2 coord = UV * 2.0 - 1.0;
     float p = atan(coord.x, coord.y);
 

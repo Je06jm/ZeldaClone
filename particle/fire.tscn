@@ -1,0 +1,29 @@
+[gd_scene load_steps=4 format=3 uid="uid://c85p06gu4pli"]
+
+[ext_resource type="Material" uid="uid://ufof76qd15k4" path="res://fire.tres" id="1_vlg0t"]
+
+[sub_resource type="QuadMesh" id="QuadMesh_w04vj"]
+
+[sub_resource type="Gradient" id="Gradient_07yrc"]
+offsets = PackedFloat32Array(0, 0.12, 0.706667, 1)
+colors = PackedColorArray(1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0)
+
+[node name="Fire" type="Node3D"]
+
+[node name="Flame" type="CPUParticles3D" parent="."]
+material_override = ExtResource("1_vlg0t")
+cast_shadow = 0
+randomness = 1.0
+lifetime_randomness = 0.6
+mesh = SubResource("QuadMesh_w04vj")
+direction = Vector3(0, 1, 0)
+gravity = Vector3(0, 4, 0)
+initial_velocity_min = 0.5
+initial_velocity_max = 2.0
+scale_amount_min = 0.4
+scale_amount_max = 1.1
+color_ramp = SubResource("Gradient_07yrc")
+hue_variation_min = -0.2
+hue_variation_max = 0.2
+anim_offset_min = 0.3434
+anim_offset_max = 0.4343

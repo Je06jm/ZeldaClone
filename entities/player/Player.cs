@@ -1,7 +1,5 @@
 using Godot;
 using System;
-using System.ComponentModel.DataAnnotations;
-using System.Diagnostics;
 
 [GlobalClass]
 public partial class Player : CharacterBody3D
@@ -238,7 +236,6 @@ public partial class Player : CharacterBody3D
             look_dir.Y = Math.Clamp(look_dir.Y, (float)-Math.PI / 3.0f, (float)Math.PI / 4.0f);
         }
     }
-
 
     public override void _Process(double delta)
     {

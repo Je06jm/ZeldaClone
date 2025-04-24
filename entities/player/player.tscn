@@ -1,10 +1,13 @@
-[gd_scene load_steps=24 format=3 uid="uid://6v5asdefc2li"]
+[gd_scene load_steps=27 format=3 uid="uid://6v5asdefc2li"]
 
 [ext_resource type="Script" uid="uid://o454nvjk04an" path="res://entities/player/Player.cs" id="1_symyc"]
 [ext_resource type="Shader" uid="uid://ck7gtia3tbp6v" path="res://entities/player/ui/stamina.gdshader" id="2_abrql"]
 [ext_resource type="PackedScene" uid="uid://kod0awm1ha4o" path="res://entities/player/model/model/gobot.glb" id="2_bls4j"]
 [ext_resource type="Texture2D" uid="uid://cfsnjm4akumlx" path="res://entities/player/ui/stamina_base.png" id="3_sglur"]
+[ext_resource type="Script" uid="uid://d1ptp4ervik0w" path="res://tools/DbgDraw/Shapes/Line.gd" id="4_qiwj3"]
+[ext_resource type="Script" uid="uid://dvor4vkcq08cc" path="res://tools/DbgDraw/Shapes/Cylinder.gd" id="5_26q78"]
 [ext_resource type="Script" uid="uid://bqi3a10qbmrh2" path="res://entities/player/pause_ui.gd" id="5_fkugw"]
+[ext_resource type="Script" uid="uid://dk8h3wpw3wtp2" path="res://tools/DbgDraw/Shapes/Capsule.gd" id="6_8fjmc"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_sfv1e"]
 
@@ -133,14 +136,14 @@ bones/0/position = Vector3(0.125361, 0.0989139, 0.0728901)
 bones/0/rotation = Quaternion(0.772549, 0.107691, -0.136221, 0.610749)
 bones/1/position = Vector3(-0.109875, 0.0989111, -0.0510765)
 bones/1/rotation = Quaternion(0.679368, -0.310085, 0.392234, 0.537083)
-bones/2/position = Vector3(0, 0.35494, 0)
-bones/2/rotation = Quaternion(0.0697315, 0.0266817, -0.00186577, 0.997207)
-bones/3/rotation = Quaternion(1, -5.78697e-11, -7.50274e-08, 3.72746e-09)
-bones/4/rotation = Quaternion(-0.464917, -0.136607, -0.0426773, 0.87371)
-bones/5/rotation = Quaternion(0.326788, 1.06396e-06, -1.11707e-05, 0.945098)
-bones/6/rotation = Quaternion(-0.203377, 0.552465, 0.21925, 0.778042)
-bones/7/rotation = Quaternion(0.485277, -1.00576e-06, 1.65902e-05, 0.87436)
-bones/8/rotation = Quaternion(-0.641497, -0.275393, -0.664857, 0.265716)
+bones/2/position = Vector3(0, 0.352274, 0)
+bones/2/rotation = Quaternion(0.0697317, 0.0265923, -0.00185952, 0.99721)
+bones/3/rotation = Quaternion(1, -5.79553e-11, -7.50286e-08, 3.72691e-09)
+bones/4/rotation = Quaternion(-0.483763, -0.135233, -0.0453496, 0.863498)
+bones/5/rotation = Quaternion(0.357042, 1.05212e-06, -1.22041e-05, 0.934088)
+bones/6/rotation = Quaternion(-0.212806, 0.550194, 0.228833, 0.774361)
+bones/7/rotation = Quaternion(0.506251, -9.86803e-07, 1.73344e-05, 0.862386)
+bones/8/rotation = Quaternion(-0.658588, -0.268382, -0.647932, 0.272795)
 bones/9/rotation = Quaternion(2.16937e-07, 5.35541e-07, -0.395029, 0.918669)
 bones/10/rotation = Quaternion(-0.289732, -0.637458, -0.217438, 0.680017)
 bones/11/rotation = Quaternion(0.487906, -0.0174399, 0.00854542, 0.87268)
@@ -148,7 +151,7 @@ bones/12/rotation = Quaternion(-0.371224, -0.00197697, 0.00585366, 0.928523)
 bones/13/rotation = Quaternion(-0.502333, 1.50049e-05, -2.85054e-05, 0.864674)
 bones/14/rotation = Quaternion(-0.371224, -0.00197698, 0.00585369, 0.928523)
 bones/15/rotation = Quaternion(-0.502333, 1.49999e-05, -2.85068e-05, 0.864674)
-bones/16/rotation = Quaternion(-0.674113, 0.261685, 0.631764, 0.279226)
+bones/16/rotation = Quaternion(-0.657436, 0.268866, 0.649101, 0.272318)
 bones/17/rotation = Quaternion(2.27203e-07, -5.84749e-07, 0.395029, 0.918669)
 bones/18/rotation = Quaternion(-0.289732, 0.637458, 0.217438, 0.680017)
 bones/19/rotation = Quaternion(0.487906, 0.0174399, -0.00854541, 0.87268)
@@ -167,6 +170,49 @@ parameters/conditions/falling = false
 parameters/conditions/grounded = false
 parameters/conditions/jumped = false
 parameters/Ground/blend_position = 0
+
+[node name="DbgCapsule" type="Node3D" parent="CharacterBase"]
+script = ExtResource("6_8fjmc")
+height = 2.0
+radius_type = 0
+radius = 0.53
+metadata/_custom_type_script = "uid://dk8h3wpw3wtp2"
+
+[node name="DbgLine" type="Node3D" parent="CharacterBase"]
+script = ExtResource("4_qiwj3")
+target = Vector3(0, 0, -2)
+metadata/_custom_type_script = "uid://d1ptp4ervik0w"
+
+[node name="DbgLine2" type="Node3D" parent="CharacterBase"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.496567, 0)
+script = ExtResource("4_qiwj3")
+target = Vector3(0, 0, -2)
+metadata/_custom_type_script = "uid://d1ptp4ervik0w"
+
+[node name="DbgCylinder" type="Node3D" parent="CharacterBase"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.461911, 0)
+script = ExtResource("5_26q78")
+color = Color(0, 1, 0, 1)
+radius_type = 0
+radius = 0.53
+metadata/_custom_type_script = "uid://dvor4vkcq08cc"
+
+[node name="DbgCylinder2" type="Node3D" parent="CharacterBase"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.256358, 0)
+script = ExtResource("5_26q78")
+color = Color(0, 1, 0, 1)
+radius_type = 0
+radius = 0.53
+metadata/_custom_type_script = "uid://dvor4vkcq08cc"
+
+[node name="DbgCylinder3" type="Node3D" parent="CharacterBase"]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 0.580704, -5.97481)
+script = ExtResource("5_26q78")
+color = Color(0, 0, 1, 1)
+height = 11.805
+radius_type = 0
+radius = 3.62
+metadata/_custom_type_script = "uid://dvor4vkcq08cc"
 
 [node name="CameraBase" type="Node3D" parent="."]
 
