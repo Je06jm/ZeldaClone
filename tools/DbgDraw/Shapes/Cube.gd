@@ -6,4 +6,4 @@ extends DbgShape
 @export var color := Color.RED
 
 func _process(_delta: float) -> void:
-    DbgDraw.Cube(global_position, size, quaternion, color)
+    DbgDraw.Cube(global_transform, size, color)

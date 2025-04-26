@@ -66,25 +66,16 @@ public partial class DbgDraw : Node3D
     };
 
     private class DrawShapeCube : DrawShape {
-        private Vector3 position;
-        private Vector3 size;
-        private Quaternion rotation;
+        private Transform3D transform;
         private Color color;
 
-        public DrawShapeCube(Vector3 position, Vector3 size, Quaternion rotation, Color color) {
-            this.position = position;
-            this.size = size;
-            this.rotation = rotation;
+        public DrawShapeCube(Transform3D transform, Color color) {
+            this.transform = transform;
             this.color = color;
         }
 
         public override void Draw(ImmediateMesh im)
         {
-            Transform3D transform = Transform3D.Identity;
-            transform = transform.Scaled(size);
-            transform.Basis = new Basis(rotation) * transform.Basis;
-            transform.Origin = position;
-
             Vector3 v000 = transform * new Vector3(-0.5f, -0.5f, -0.5f);
             Vector3 v001 = transform * new Vector3(-0.5f, -0.5f,  0.5f);
             Vector3 v010 = transform * new Vector3(-0.5f,  0.5f, -0.5f);
@@ -139,15 +130,11 @@ public partial class DbgDraw : Node3D
     };
 
     private class DrawShapeSphere : DrawShape {
-        private Vector3 position;
-        private float radius;
-        private Quaternion rotation;
+        private Transform3D transform;
         private Color color;
 
-        public DrawShapeSphere(Vector3 position, float radius, Quaternion rotation, Color color) {
-            this.position = position;
-            this.radius = radius;
-            this.rotation = rotation;
+        public DrawShapeSphere(Transform3D transform, Color color) {
+            this.transform = transform;
             this.color = color;
         }
 
@@ -156,12 +143,6 @@ public partial class DbgDraw : Node3D
             const int segments = 32;
 
             im.SurfaceBegin(Mesh.PrimitiveType.LineStrip);
-
-            Transform3D transform = Transform3D.Identity;
-
-            transform = transform.Scaled(new Vector3(radius, radius, radius));
-            transform.Basis = new Basis(rotation) * transform.Basis;
-            transform.Origin = position;
 
             List<float> cos = new List<float>();
             List<float> sin = new List<float>();
@@ -201,90 +182,19 @@ public partial class DbgDraw : Node3D
             im.SurfaceEnd();
         }
     };
-
-    private class DrawShapeCapsule : DrawShape {
-        private Vector3 position;
-        private float top_radius;
-        private float bottom_radius;
-        private float height;
-        private Quaternion rotation;
-        private Color color;
-
-        public DrawShapeCapsule(Vector3 position, float top_radius, float bottom_radius, float height, Quaternion rotation, Color color) {
-            this.position = position;
-            this.top_radius = top_radius;
-            this.bottom_radius = bottom_radius;
-            this.height = height;
-            this.rotation = rotation;
-            this.color = color;
-        }
-
-        public override void Draw(ImmediateMesh im)
-        {
-            Transform3D transform = Transform3D.Identity;
-
-            transform.Basis = new Basis(rotation) * transform.Basis;
-            transform.Origin = position;
-
-            var height_half = (height - top_radius - bottom_radius) / 2.0f;
-
-            Vector3 top_center = new Vector3(0.0f, height_half, 0.0f);
-            Vector3 bottom_center = new Vector3(0.0f, -height_half, 0.0f);
-
-            top_center = transform * top_center;
-            bottom_center = transform * bottom_center;
-
-            var top = new DrawShapeSphere(top_center, top_radius, rotation, color);
-            var bottom = new DrawShapeSphere(bottom_center, bottom_radius, rotation, color);
-
-            top.Draw(im);
-            bottom.Draw(im);
-
-            var top0 = new Vector3(top_radius, height_half, 0.0f);
-            var bottom0 = new Vector3(bottom_radius, -height_half, 0.0f);
-
-            var top1 = new Vector3(-top_radius, height_half, 0.0f);
-            var bottom1 = new Vector3(-bottom_radius, -height_half, 0.0f);
-
-            var top2 = new Vector3(0.0f, height_half, top_radius);
-            var bottom2 = new Vector3(0.0f, -height_half, bottom_radius);
-
-            var top3 = new Vector3(0.0f, height_half, -top_radius);
-            var bottom3 = new Vector3(0.0f, -height_half, -bottom_radius);
-
-            im.SurfaceBegin(Mesh.PrimitiveType.Lines);
-
-            PushVertex(im, top0, color, transform);
-            PushVertex(im, bottom0, color, transform);
-
-            PushVertex(im, top1, color, transform);
-            PushVertex(im, bottom1, color, transform);
-
-            PushVertex(im, top2, color, transform);
-            PushVertex(im, bottom2, color, transform);
-
-            PushVertex(im, top3, color, transform);
-            PushVertex(im, bottom3, color, transform);
-
-            im.SurfaceEnd();
-        }
-
-    };
-
+    
     private class DrawShapeCylinder : DrawShape {
-        private Vector3 position;
+        private Transform3D transform;
         private float top_radius;
         private float bottom_radius;
         private float height;
-        private Quaternion rotation;
         private Color color;
 
-        public DrawShapeCylinder(Vector3 position, float top_radius, float bottom_radius, float height, Quaternion rotation, Color color) {
-            this.position = position;
+        public DrawShapeCylinder(Transform3D transform, float top_radius, float bottom_radius, float height, Color color) {
+            this.transform = transform;
             this.top_radius = top_radius;
             this.bottom_radius = bottom_radius;
             this.height = height;
-            this.rotation = rotation;
             this.color = color;
         }
 
@@ -293,6 +203,8 @@ public partial class DbgDraw : Node3D
             const int segments = 32;
 
             im.SurfaceBegin(Mesh.PrimitiveType.LineStrip);
+
+            float height_half = height / 2.0f;
 
             List<float> cos = new List<float>();
             List<float> sin = new List<float>();
@@ -308,21 +220,16 @@ public partial class DbgDraw : Node3D
                 sin.Add(s);
             }
 
-            Transform3D transform =Transform3D.Identity;
-            transform = transform.Scaled(new Vector3(1.0f, height, 1.0f));
-            transform.Basis = new Basis(rotation) * transform.Basis;
-            transform.Origin = position;
-
             for (int i = 0; i <= segments; i++) {
                 Vector3 pos = new Vector3(cos[i], 0.0f, sin[i]) * top_radius;
-                pos = pos with {Y = 0.5f};
+                pos = pos with {Y = height_half};
 
                 PushVertex(im, pos, color, transform);
             }
 
             for (int i = 0; i <= segments; i++) {
                 Vector3 pos = new Vector3(cos[i], 0.0f, sin[i]) * bottom_radius;
-                pos = pos with {Y = -0.5f};
+                pos = pos with {Y = -height_half};
 
                 PushVertex(im, pos, color, transform);
             }
@@ -331,24 +238,92 @@ public partial class DbgDraw : Node3D
 
             im.SurfaceBegin(Mesh.PrimitiveType.Lines);
 
-            PushVertex(im, new Vector3(-top_radius, 0.5f, 0.0f), color, transform);
-            PushVertex(im, new Vector3(-bottom_radius, -0.5f, 0.0f), color, transform);
+            PushVertex(im, new Vector3(-top_radius, height_half, 0.0f), color, transform);
+            PushVertex(im, new Vector3(-bottom_radius, -height_half, 0.0f), color, transform);
 
-            PushVertex(im, new Vector3(0.0f, 0.5f, top_radius), color, transform);
-            PushVertex(im, new Vector3(0.0f, -0.5f, bottom_radius), color, transform);
+            PushVertex(im, new Vector3(0.0f, height_half, top_radius), color, transform);
+            PushVertex(im, new Vector3(0.0f, -height_half, bottom_radius), color, transform);
 
-            PushVertex(im, new Vector3(0.0f, 0.5f, -top_radius), color, transform);
-            PushVertex(im, new Vector3(0.0f, -0.5f, -bottom_radius), color, transform);
+            PushVertex(im, new Vector3(0.0f, height_half, -top_radius), color, transform);
+            PushVertex(im, new Vector3(0.0f, -height_half, -bottom_radius), color, transform);
 
             im.SurfaceEnd();
         }
+    };
 
+    private class DrawShapeCapsule : DrawShape {
+        private Transform3D transform;
+        private float top_radius;
+        private float bottom_radius;
+        private float height;
+        private Color color;
+
+        public DrawShapeCapsule(Transform3D transform, float top_radius, float bottom_radius, float height, Color color) {
+            this.transform = transform;
+            this.top_radius = top_radius;
+            this.bottom_radius = bottom_radius;
+            this.height = height;
+            this.color = color;
+        }
+
+        public override void Draw(ImmediateMesh im)
+        {
+            var top_transform = Transform3D.Identity;
+            var bottom_transform = Transform3D.Identity;
+
+            top_transform = top_transform.Scaled(Vector3.One * top_radius);
+            bottom_transform = bottom_transform.Scaled(Vector3.One * bottom_radius);
+
+            top_transform.Origin = new Vector3(0.0f, (height / 2.0f) - top_radius, 0.0f);
+            bottom_transform.Origin = new Vector3(0.0f, -((height / 2.0f) - bottom_radius), 0.0f);
+
+            float top_height = top_transform.Origin.Y;
+            float bottom_height = bottom_transform.Origin.Y;
+
+            var center_transform = Transform3D.Identity;
+            center_transform.Origin = (top_transform.Origin + bottom_transform.Origin) / 2.0f;
+
+            top_transform = transform * top_transform;
+            bottom_transform = transform * bottom_transform;
+            center_transform = transform * center_transform;
+
+            var top = new DrawShapeSphere(top_transform, color);
+            var bottom = new DrawShapeSphere(bottom_transform, color);
+
+            top.Draw(im);
+            bottom.Draw(im);
+
+            im.SurfaceBegin(Mesh.PrimitiveType.Lines);
+
+            PushVertex(im, new Vector3(top_radius, top_height, 0.0f), color, center_transform);
+            PushVertex(im, new Vector3(bottom_radius, bottom_height, 0.0f), color, center_transform);
+
+            PushVertex(im, new Vector3(-top_radius, top_height, 0.0f), color, center_transform);
+            PushVertex(im, new Vector3(-bottom_radius, bottom_height, 0.0f), color, center_transform);
+
+            PushVertex(im, new Vector3(0.0f, top_height, top_radius), color, center_transform);
+            PushVertex(im, new Vector3(0.0f, bottom_height, bottom_radius), color, center_transform);
+
+            PushVertex(im, new Vector3(0.0f, top_height, -top_radius), color, center_transform);
+            PushVertex(im, new Vector3(0.0f, bottom_height, -bottom_radius), color, center_transform);
+
+            im.SurfaceEnd();
+        }
     };
 
     static List<DrawShape> draw_shapes = new List<DrawShape>();
 
-    static public void Cube(Vector3 center, Vector3 size, Quaternion rotation, Color color) {
-        draw_shapes.Add(new DrawShapeCube(center, size, rotation, color));
+    static public void Cube(Transform3D transform, Vector3 size, Color color) {
+        var scaled = Transform3D.Identity;
+        scaled = scaled.Scaled(size);
+        draw_shapes.Add(new DrawShapeCube(transform * scaled, color));
+    }
+
+    static public void Cube(Vector3 center, Quaternion rotation, Vector3 size, Color color) {
+        var transform = Transform3D.Identity;
+        transform.Origin = center;
+        transform.Basis = new Basis(rotation) * transform.Basis;
+        Cube(transform, size, color);
     }
 
     static public void Line(Vector3 begin, Vector3 end, Color color) {
@@ -374,16 +349,10 @@ public partial class DbgDraw : Node3D
         Line(origin + Vector3.Back * lead_length, origin + Vector3.Forward * lead_length, Color.Color8(0, 0, 255));
     }
 
-    static public void AxisMarker(Vector3 origin, float lead_length, Quaternion rotation) {
-        Transform3D transform = Transform3D.Identity;
-
-        transform = transform.Scaled(new Vector3(lead_length, lead_length, lead_length));
-        transform.Basis = new Basis(rotation) * transform.Basis;
-        transform.Origin = origin;
-
-        Line(transform * Vector3.Left, transform * Vector3.Right, Color.Color8(255, 0, 0));
-        Line(transform * Vector3.Down, transform * Vector3.Up, Color.Color8(0, 255, 0));
-        Line(transform * Vector3.Back, transform * Vector3.Forward, Color.Color8(0, 0, 255));
+    static public void AxisMarker(Transform3D transform, float lead_length) {
+        Line(transform * Vector3.Left * lead_length, transform * Vector3.Right * lead_length, Color.Color8(255, 0, 0));
+        Line(transform * Vector3.Down * lead_length, transform * Vector3.Up * lead_length, Color.Color8(0, 255, 0));
+        Line(transform * Vector3.Back * lead_length, transform * Vector3.Forward * lead_length, Color.Color8(0, 0, 255));
     }
 
     static public void Point(Vector3 point, Color color) {
@@ -397,28 +366,66 @@ public partial class DbgDraw : Node3D
         draw_shapes.Add(new DrawShapePoints(points, color));
     }
 
-    static public void Sphere(Vector3 center, float radius, Color color) {
-        draw_shapes.Add(new DrawShapeSphere(center, radius, Quaternion.Identity, color));
+    static public void Sphere(Transform3D transform, float radius, Color color) {
+        var scaled = Transform3D.Identity;
+        scaled = scaled.Scaled(Vector3.One * radius);
+        draw_shapes.Add(new DrawShapeSphere(transform * scaled, color));
     }
 
-    static public void Sphere(Vector3 center, float radius, Quaternion rotation, Color color) {
-        draw_shapes.Add(new DrawShapeSphere(center, radius, rotation, color));
+    static public void Sphere(Vector3 center, Quaternion rotation, float radius, Color color) {
+        var transform = Transform3D.Identity;
+        transform.Origin = center;
+        transform.Basis = new Basis(rotation) * transform.Basis;
+
+        Sphere(transform, radius, color);
     }
 
-    static public void Cylinder(Vector3 center, float radius, float height, Quaternion rotation, Color color) {
-        draw_shapes.Add(new DrawShapeCylinder(center, radius, radius, height, rotation, color));
+    static public void Cylinder(Transform3D transform, float radius, float height, Color color) {
+        draw_shapes.Add(new DrawShapeCylinder(transform, radius, radius, height, color));
     }
 
-    static public void Cylinder(Vector3 center, float top_radius, float bottom_radius, float height, Quaternion rotation, Color color) {
-        draw_shapes.Add(new DrawShapeCylinder(center, top_radius, bottom_radius, height, rotation, color));
+    static public void Cylinder(Vector3 center, Quaternion rotation, float radius, float height, Color color) {
+        var transform = Transform3D.Identity;
+        transform.Origin = center;
+        transform.Basis = new Basis(rotation) * transform.Basis;
+
+        Cylinder(transform, radius, height, color);
     }
 
-    static public void Capsule(Vector3 center, float radius, float height, Quaternion rotation, Color color) {
-        draw_shapes.Add(new DrawShapeCapsule(center, radius, radius, height, rotation, color));
+    static public void Cylinder(Transform3D transform, float top_radius, float bottom_radius, float height, Color color) {
+        draw_shapes.Add(new DrawShapeCylinder(transform, top_radius, bottom_radius, height, color));
     }
 
-    static public void Capsule(Vector3 center, float top_radius, float bottom_radius, float height, Quaternion rotation, Color color) {
-        draw_shapes.Add(new DrawShapeCapsule(center, top_radius, bottom_radius, height, rotation, color));
+    static public void Cylinder(Vector3 center, Quaternion rotation, float top_radius, float bottom_radius, float height, Color color) {
+        var transform = Transform3D.Identity;
+        transform.Origin = center;
+        transform.Basis = new Basis(rotation) * transform.Basis;
+
+        Cylinder(transform, top_radius, bottom_radius, height, color);
+    }
+
+    static public void Capsule(Transform3D transform, float radius, float height, Color color) {
+        draw_shapes.Add(new DrawShapeCapsule(transform, radius, radius, height, color));
+    }
+
+    static public void Capsule(Vector3 position, Quaternion rotation, float radius, float height, Color color) {
+        var transform = Transform3D.Identity;
+        transform.Origin = position;
+        transform.Basis = new Basis(rotation) * transform.Basis;
+
+        Capsule(transform, radius, height, color);
+    }
+
+    static public void Capsule(Transform3D transform, float top_radius, float bottom_radius, float height, Color color) {
+        draw_shapes.Add(new DrawShapeCapsule(transform, top_radius, bottom_radius, height, color));
+    }
+
+    static public void Capsule(Vector3 position, Quaternion rotation, float top_radius, float bottom_radius, float height, Color color) {
+        var transform = Transform3D.Identity;
+        transform.Origin = position;
+        transform.Basis = new Basis(rotation) * transform.Basis;
+
+        Capsule(transform, top_radius, bottom_radius, height, color);
     }
 
     public override void _Ready()

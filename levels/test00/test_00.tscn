@@ -1,19 +1,17 @@
-[gd_scene load_steps=26 format=3 uid="uid://cl2tlybu11gy8"]
+[gd_scene load_steps=24 format=3 uid="uid://cl2tlybu11gy8"]
 
-[ext_resource type="PackedScene" uid="uid://6v5asdefc2li" path="res://entities/player/player.tscn" id="1_udyse"]
 [ext_resource type="Material" uid="uid://dg6tbjuf0idrc" path="res://levels/test00/basic_water.tres" id="2_tk752"]
 [ext_resource type="Material" uid="uid://bhjf4ki6t6d52" path="res://levels/test00/basic_danger_water.tres" id="3_tk752"]
 [ext_resource type="Script" uid="uid://yhg3od88m48k" path="res://addons/zylann.hterrain/hterrain.gd" id="8_q1lyv"]
 [ext_resource type="Resource" uid="uid://c3amhlis5kxul" path="res://levels/test00/terrain/data.hterrain" id="9_2em0n"]
 [ext_resource type="Shader" uid="uid://bx5x308i07k62" path="res://world/day_night.gdshader" id="9_c1tx8"]
-[ext_resource type="Script" uid="uid://bwilj25glfrtg" path="res://world/DayNightCycle.cs" id="10_q1lyv"]
 [ext_resource type="Script" uid="uid://bdtor8vf2t4x3" path="res://addons/zylann.hterrain/hterrain_texture_set.gd" id="10_rl2u6"]
 [ext_resource type="Texture2D" uid="uid://cmef3gmi0ycts" path="res://test_00_slot0_albedo_bump.png" id="11_v7f34"]
-[ext_resource type="Script" uid="uid://bghrk8gxro1ya" path="res://world/Region.cs" id="12_2em0n"]
 [ext_resource type="Texture2D" uid="uid://dm31rtaij7cvf" path="res://test_00_slot1_albedo_bump.png" id="12_kw6vr"]
 [ext_resource type="Texture2D" uid="uid://b7mwxfhqq6w2r" path="res://test_00_slot2_albedo_bump.png" id="13_7n64a"]
-[ext_resource type="Texture2D" uid="uid://dfqdyreyslv7d" path="res://world/heightmap.bmp" id="13_rl2u6"]
+[ext_resource type="PackedScene" uid="uid://ev3gyllytct1" path="res://entities/new_player/new_player.tscn" id="13_rl2u6"]
 [ext_resource type="Texture2D" uid="uid://gx4p8quvkls5" path="res://test_00_slot0_normal_roughness.png" id="14_1uj30"]
+[ext_resource type="Script" uid="uid://pudplw10qx21" path="res://levels/test00/CsgSphere3d.cs" id="14_xsgad"]
 [ext_resource type="Texture2D" uid="uid://dc5vptpp1dtib" path="res://test_00_slot1_normal_roughness.png" id="15_ipjch"]
 [ext_resource type="Texture2D" uid="uid://07rafstg1tj7" path="res://test_00_slot2_normal_roughness.png" id="16_a54bs"]
 
@@ -55,10 +53,6 @@ mode = 0
 textures = [[ExtResource("11_v7f34"), ExtResource("12_kw6vr"), ExtResource("13_7n64a")], [ExtResource("14_1uj30"), ExtResource("15_ipjch"), ExtResource("16_a54bs")]]
 
 [node name="Test00" type="Node3D"]
-
-[node name="Player" parent="." instance=ExtResource("1_udyse")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.78701, 1.18016, 7.20938)
-wall_min_slide_angle = 0.523599
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
 transform = Transform3D(-0.343737, 0.349548, 0.871585, 0.717458, -0.501083, 0.483911, 0.605886, 0.791664, -0.0785455, 0, 8.04805, 9.80068)
@@ -111,20 +105,6 @@ monitoring = false
 [node name="CollisionShape3D" type="CollisionShape3D" parent="CSGBox3D/Area3D"]
 shape = SubResource("BoxShape3D_7pub6")
 
-[node name="DayNight" type="Node" parent="." node_paths=PackedStringArray("sun", "environment")]
-script = ExtResource("10_q1lyv")
-sun = NodePath("../DirectionalLight3D")
-environment = NodePath("../WorldEnvironment")
-
-[node name="Region" type="Node3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.41696, 0)
-script = ExtResource("12_2em0n")
-resolution = 16
-region_size = 4
-height_map = ExtResource("13_rl2u6")
-max_height = 16.0
-metadata/_custom_type_script = "uid://bghrk8gxro1ya"
-
 [node name="HTerrain" type="Node3D" parent="."]
 script = ExtResource("8_q1lyv")
 centered = true
@@ -145,4 +125,16 @@ shader_params/u_triplanar = null
 shader_params/u_tile_reduction = null
 metadata/_custom_type_script = "uid://yhg3od88m48k"
 
-[node name="Sprite3D" type="Sprite3D" parent="."]
+[node name="NewPlayer" parent="." instance=ExtResource("13_rl2u6")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -6.95762, 0)
+
+[node name="CameraHing" parent="NewPlayer" index="1" node_paths=PackedStringArray("target_node")]
+target_node = NodePath("../../CSGSphere3D")
+
+[node name="CSGSphere3D" type="CSGSphere3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -5.45, -5.16343)
+radial_segments = 32
+rings = 32
+script = ExtResource("14_xsgad")
+
+[editable path="NewPlayer"]

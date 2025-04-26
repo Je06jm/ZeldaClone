@@ -1,0 +1,44 @@
+[gd_scene load_steps=3 format=3 uid="uid://ev3gyllytct1"]
+
+[ext_resource type="Script" uid="uid://drmkadvqyvoje" path="res://entities/new_player/scripts/CameraHing.cs" id="1_8o0lc"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_ldjlr"]
+
+[node name="NewPlayer" type="Node3D"]
+
+[node name="CharacterBody3D" type="CharacterBody3D" parent="."]
+collision_layer = 65536
+collision_mask = 3
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="CharacterBody3D"]
+shape = SubResource("CapsuleShape3D_ldjlr")
+
+[node name="CSGBox3D" type="CSGBox3D" parent="CharacterBody3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.490028, -0.456452)
+
+[node name="CSGCylinder3D" type="CSGCylinder3D" parent="CharacterBody3D"]
+sides = 32
+
+[node name="CameraHing" type="Node3D" parent="." node_paths=PackedStringArray("ray_casts")]
+script = ExtResource("1_8o0lc")
+margin = 1.0
+ray_casts = [NodePath("RayCast3D"), NodePath("RayCast3D2"), NodePath("RayCast3D3"), NodePath("RayCast3D4")]
+
+[node name="RayCast3D" type="RayCast3D" parent="CameraHing"]
+transform = Transform3D(0.999848, 0.000304586, 0.0174497, 0, 0.999848, -0.0174524, -0.0174524, 0.0174497, 0.999695, 0, 0, 0)
+target_position = Vector3(0, 0, 5.5)
+
+[node name="RayCast3D2" type="RayCast3D" parent="CameraHing"]
+transform = Transform3D(0.999848, -0.000304586, 0.0174497, 0, 0.999848, 0.0174524, -0.0174524, -0.0174497, 0.999695, 0, 0, 0)
+target_position = Vector3(0, 0, 5.5)
+
+[node name="RayCast3D3" type="RayCast3D" parent="CameraHing"]
+transform = Transform3D(0.999848, -0.000304586, -0.0174497, 0, 0.999848, -0.0174524, 0.0174524, 0.0174497, 0.999695, 0, 0, 0)
+target_position = Vector3(0, 0, 5.5)
+
+[node name="RayCast3D4" type="RayCast3D" parent="CameraHing"]
+transform = Transform3D(0.999848, 0.000304586, -0.0174497, 0, 0.999848, 0.0174524, 0.0174524, -0.0174497, 0.999695, 0, 0, 0)
+target_position = Vector3(0, 0, 5.5)
+
+[node name="Camera3D" type="Camera3D" parent="CameraHing"]
+current = true

@@ -114,7 +114,7 @@ func _property_get_revert(property: StringName) -> Variant:
 func _process(_delta: float) -> void:
     match radius_type:
         0:
-            DbgDraw.Cylinder(global_position, radius, height, quaternion, color)
+            DbgDraw.Cylinder(global_transform, radius, height, color)
         
         1:
-            DbgDraw.Cylinder(global_position, radius_top, radius_bottom, height, quaternion, color)
+            DbgDraw.Cylinder(global_transform, radius_top, radius_bottom, height, color)

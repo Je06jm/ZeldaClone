@@ -1,4 +1,4 @@
-[gd_scene load_steps=27 format=3 uid="uid://6v5asdefc2li"]
+[gd_scene load_steps=26 format=3 uid="uid://6v5asdefc2li"]
 
 [ext_resource type="Script" uid="uid://o454nvjk04an" path="res://entities/player/Player.cs" id="1_symyc"]
 [ext_resource type="Shader" uid="uid://ck7gtia3tbp6v" path="res://entities/player/ui/stamina.gdshader" id="2_abrql"]
@@ -7,7 +7,6 @@
 [ext_resource type="Script" uid="uid://d1ptp4ervik0w" path="res://tools/DbgDraw/Shapes/Line.gd" id="4_qiwj3"]
 [ext_resource type="Script" uid="uid://dvor4vkcq08cc" path="res://tools/DbgDraw/Shapes/Cylinder.gd" id="5_26q78"]
 [ext_resource type="Script" uid="uid://bqi3a10qbmrh2" path="res://entities/player/pause_ui.gd" id="5_fkugw"]
-[ext_resource type="Script" uid="uid://dk8h3wpw3wtp2" path="res://tools/DbgDraw/Shapes/Capsule.gd" id="6_8fjmc"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_sfv1e"]
 
@@ -136,14 +135,14 @@ bones/0/position = Vector3(0.125361, 0.0989139, 0.0728901)
 bones/0/rotation = Quaternion(0.772549, 0.107691, -0.136221, 0.610749)
 bones/1/position = Vector3(-0.109875, 0.0989111, -0.0510765)
 bones/1/rotation = Quaternion(0.679368, -0.310085, 0.392234, 0.537083)
-bones/2/position = Vector3(0, 0.352274, 0)
-bones/2/rotation = Quaternion(0.0697317, 0.0265923, -0.00185952, 0.99721)
-bones/3/rotation = Quaternion(1, -5.79553e-11, -7.50286e-08, 3.72691e-09)
-bones/4/rotation = Quaternion(-0.483763, -0.135233, -0.0453496, 0.863498)
-bones/5/rotation = Quaternion(0.357042, 1.05212e-06, -1.22041e-05, 0.934088)
-bones/6/rotation = Quaternion(-0.212806, 0.550194, 0.228833, 0.774361)
-bones/7/rotation = Quaternion(0.506251, -9.86803e-07, 1.73344e-05, 0.862386)
-bones/8/rotation = Quaternion(-0.658588, -0.268382, -0.647932, 0.272795)
+bones/2/position = Vector3(0, 0.349677, 0)
+bones/2/rotation = Quaternion(0.0697473, 0.016131, -0.00112799, 0.997434)
+bones/3/rotation = Quaternion(1, -5.81725e-11, -7.50317e-08, 3.72551e-09)
+bones/4/rotation = Quaternion(-0.503369, -0.144452, -0.0537644, 0.850213)
+bones/5/rotation = Quaternion(0.397664, 1.04139e-06, -1.35879e-05, 0.917531)
+bones/6/rotation = Quaternion(-0.233722, 0.535853, 0.235272, 0.776455)
+bones/7/rotation = Quaternion(0.531508, -9.58825e-07, 1.81824e-05, 0.847053)
+bones/8/rotation = Quaternion(-0.696735, -0.251313, -0.606724, 0.288596)
 bones/9/rotation = Quaternion(2.16937e-07, 5.35541e-07, -0.395029, 0.918669)
 bones/10/rotation = Quaternion(-0.289732, -0.637458, -0.217438, 0.680017)
 bones/11/rotation = Quaternion(0.487906, -0.0174399, 0.00854542, 0.87268)
@@ -151,7 +150,7 @@ bones/12/rotation = Quaternion(-0.371224, -0.00197697, 0.00585366, 0.928523)
 bones/13/rotation = Quaternion(-0.502333, 1.50049e-05, -2.85054e-05, 0.864674)
 bones/14/rotation = Quaternion(-0.371224, -0.00197698, 0.00585369, 0.928523)
 bones/15/rotation = Quaternion(-0.502333, 1.49999e-05, -2.85068e-05, 0.864674)
-bones/16/rotation = Quaternion(-0.657436, 0.268866, 0.649101, 0.272318)
+bones/16/rotation = Quaternion(-0.616789, 0.284913, 0.68784, 0.255482)
 bones/17/rotation = Quaternion(2.27203e-07, -5.84749e-07, 0.395029, 0.918669)
 bones/18/rotation = Quaternion(-0.289732, 0.637458, 0.217438, 0.680017)
 bones/19/rotation = Quaternion(0.487906, 0.0174399, -0.00854541, 0.87268)
@@ -170,13 +169,6 @@ parameters/conditions/falling = false
 parameters/conditions/grounded = false
 parameters/conditions/jumped = false
 parameters/Ground/blend_position = 0
-
-[node name="DbgCapsule" type="Node3D" parent="CharacterBase"]
-script = ExtResource("6_8fjmc")
-height = 2.0
-radius_type = 0
-radius = 0.53
-metadata/_custom_type_script = "uid://dk8h3wpw3wtp2"
 
 [node name="DbgLine" type="Node3D" parent="CharacterBase"]
 script = ExtResource("4_qiwj3")
@@ -209,9 +201,9 @@ metadata/_custom_type_script = "uid://dvor4vkcq08cc"
 transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 0.580704, -5.97481)
 script = ExtResource("5_26q78")
 color = Color(0, 0, 1, 1)
-height = 11.805
+height = 11.8
 radius_type = 0
-radius = 3.62
+radius = 3.705
 metadata/_custom_type_script = "uid://dvor4vkcq08cc"
 
 [node name="CameraBase" type="Node3D" parent="."]

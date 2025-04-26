@@ -6,4 +6,4 @@ extends DbgShape
 @export var radius := 1.0
 
 func _process(_delta: float) -> void:
-    DbgDraw.Sphere(global_position, radius, quaternion, color)
+    DbgDraw.Sphere(global_transform, radius, color)

@@ -7,4 +7,5 @@ extends DbgShape
 @export var target := Vector3.FORWARD
 
 func _process(_delta: float) -> void:
-    DbgDraw.Line(global_position, global_position + target, color)
+    var point := global_transform * target
+    DbgDraw.Line(global_position, point, color)
