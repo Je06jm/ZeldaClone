@@ -105,13 +105,15 @@ public partial class CameraHing : Node3D
             }
         }
         else if (Input.IsActionPressed("shield") && target_node != null) {
-            var angle = CalculateTargetAngle();
+            bool flipped;
+            var angle = CalculateTargetAngle(out flipped);
 
-            bool flipped = false;
             var delta_angle = Mathf.AngleDifference(last_target_angle, angle);
             last_target_angle = angle;
 
-            GD.Print(angle);
+            if (flipped) {
+                delta_angle = -delta_angle;
+            }
 
             target_dir = target_dir with {X = target_dir.X + delta_angle};
         }
