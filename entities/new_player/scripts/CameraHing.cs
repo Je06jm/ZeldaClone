@@ -15,13 +15,28 @@ public partial class CameraHing : Node3D
     [Export]
     private float margin = 0.5f;
 
-    [Export]
-    public Array<RayCast3D> ray_casts;
+    private Array<RayCast3D> ray_casts = new Array<RayCast3D>();
 
     [Export]
     public Node3D target_node;
 
-    private float target_distance;
+    public float last_target_angle = 0.0f;
+
+    private bool _mouse_captured = false;
+
+    private bool mouse_captured {
+        get { return _mouse_captured; }
+        set {
+            _mouse_captured = value;
+
+            if (value) {
+                Input.MouseMode = Input.MouseModeEnum.Captured;
+            }
+            else {
+                Input.MouseMode = Input.MouseModeEnum.Visible;
+            }
+        }
+    }
 
     public override void _Ready()
     {
@@ -29,13 +44,42 @@ public partial class CameraHing : Node3D
 
         camera = GetNode<Camera3D>("Camera3D");
 
-        target_distance = 0.0f;
+        ray_casts.Add(GetNode<RayCast3D>("RayCast3D"));
+        ray_casts.Add(GetNode<RayCast3D>("RayCast3D2"));
+        ray_casts.Add(GetNode<RayCast3D>("RayCast3D3"));
+        ray_casts.Add(GetNode<RayCast3D>("RayCast3D4"));
+    }
 
-        foreach (var ray in ray_casts) {
-            target_distance += ray.TargetPosition.Length() - margin;
+    public override void _Input(InputEvent @event)
+    {
+        base._Input(@event);
+
+        if (@event.IsClass("InputEventMouseMotion") && mouse_captured) {
+            var motion = (InputEventMouseMotion)@event;
+
+            target_dir -= motion.Relative * 0.001f;
+        }
+    }
+
+    private float CalculateTargetAngle(out bool flipped) {
+        var direction = ToLocal(target_node.GlobalPosition);
+
+        var angle = (float)Math.Atan2(direction.X, direction.Z);
+
+        if (Math.Abs(angle) <= ((float)Math.PI / 2.0f)) {
+           angle = 2.0f * (float)Math.PI - angle;
+           flipped = true;
+        }
+        else {
+            angle += (float)Math.PI;
+            flipped = false;
         }
 
-        target_distance /= ray_casts.Count;
+        return angle;
+    }
+
+    private float CalculateTargetAngle() {
+        return CalculateTargetAngle(out _);
     }
 
     public override void _Process(double delta)
@@ -49,34 +93,46 @@ public partial class CameraHing : Node3D
         target_dir.Y = Math.Clamp(target_dir.Y, (float)-Math.PI / 2.5f, (float)Math.PI / 4.0f);
 
         if (Input.IsActionJustPressed("shield")) {
-            target_dir = Vector2.Zero;
+            if (target_node != null) {
+                var angle = CalculateTargetAngle();
+
+                last_target_angle = angle;
+
+                target_dir = new Vector2(angle, 0.0f);
+            }
+            else {
+                target_dir = Vector2.Zero;
+            }
+        }
+        else if (Input.IsActionPressed("shield") && target_node != null) {
+            var angle = CalculateTargetAngle();
+
+            bool flipped = false;
+            var delta_angle = Mathf.AngleDifference(last_target_angle, angle);
+            last_target_angle = angle;
+
+            GD.Print(angle);
+
+            target_dir = target_dir with {X = target_dir.X + delta_angle};
         }
 
-        if (target_node != null && Input.IsActionPressed("shield")) {
-            var direction = ToLocal(target_node.GlobalPosition);
-
-            var angle = (float)Math.Atan2(direction.X, direction.Z) + (float)Math.PI;
-
-            look_dir = look_dir with {
-                X = Mathf.LerpAngle(look_dir.X, target_dir.X + angle, 1.0f - (float)Math.Pow(LOOK_CHANGE_ALPHA, delta)),
-                Y = Mathf.LerpAngle(look_dir.Y, target_dir.Y, 1.0f - (float)Math.Pow(LOOK_CHANGE_ALPHA, delta))
-            };
-        }
-        else {
-            look_dir = look_dir with {
-                X = Mathf.LerpAngle(look_dir.X, target_dir.X, 1.0f - (float)Math.Pow(LOOK_CHANGE_ALPHA, delta)),
-                Y = Mathf.LerpAngle(look_dir.Y, target_dir.Y, 1.0f - (float)Math.Pow(LOOK_CHANGE_ALPHA, delta))
-            };
-        }
+        look_dir = look_dir with {
+            X = Mathf.LerpAngle(look_dir.X, target_dir.X, 1.0f - (float)Math.Pow(LOOK_CHANGE_ALPHA, delta)),
+            Y = Mathf.LerpAngle(look_dir.Y, target_dir.Y, 1.0f - (float)Math.Pow(LOOK_CHANGE_ALPHA, delta))
+        };
 
         Rotation = Rotation with {X = look_dir.Y, Y = look_dir.X};
+
+        if (Input.IsActionJustPressed("ui_cancel")) {
+            mouse_captured = !mouse_captured;
+        }
     }
 
     public override void _PhysicsProcess(double delta)
     {
         base._PhysicsProcess(delta);
 
-        Vector3 target_pos = Vector3.Back * target_distance;
+        Vector3 target_pos = Vector3.Back * (ray_casts[0].TargetPosition.Length() - margin);
         
         foreach (var ray in ray_casts) {
             if (ray.IsColliding()) {
@@ -95,6 +151,4 @@ public partial class CameraHing : Node3D
 
         camera.Position = camera.Position.Lerp(target_pos, 1.0f - (float)Math.Pow(SPRING_CHANGE_ALPHA, delta));
     }
-
-
 }

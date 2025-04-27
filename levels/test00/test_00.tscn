@@ -128,7 +128,8 @@ metadata/_custom_type_script = "uid://yhg3od88m48k"
 [node name="NewPlayer" parent="." instance=ExtResource("13_rl2u6")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -6.95762, 0)
 
-[node name="CameraHing" parent="NewPlayer" index="1" node_paths=PackedStringArray("target_node")]
+[node name="CameraHing" parent="NewPlayer" index="1" node_paths=PackedStringArray("ray_casts", "target_node")]
+ray_casts = []
 target_node = NodePath("../../CSGSphere3D")
 
 [node name="CSGSphere3D" type="CSGSphere3D" parent="."]

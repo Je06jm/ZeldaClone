@@ -19,25 +19,24 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.490028, -0.456452)
 [node name="CSGCylinder3D" type="CSGCylinder3D" parent="CharacterBody3D"]
 sides = 32
 
-[node name="CameraHing" type="Node3D" parent="." node_paths=PackedStringArray("ray_casts")]
+[node name="CameraHing" type="Node3D" parent="."]
 script = ExtResource("1_8o0lc")
-margin = 1.0
-ray_casts = [NodePath("RayCast3D"), NodePath("RayCast3D2"), NodePath("RayCast3D3"), NodePath("RayCast3D4")]
+margin = 1.5
 
 [node name="RayCast3D" type="RayCast3D" parent="CameraHing"]
-transform = Transform3D(0.999848, 0.000304586, 0.0174497, 0, 0.999848, -0.0174524, -0.0174524, 0.0174497, 0.999695, 0, 0, 0)
+transform = Transform3D(0.999658, 0.000685233, 0.026168, 0, 0.999658, -0.0261769, -0.026177, 0.026168, 0.999314, 0, 0, 0)
 target_position = Vector3(0, 0, 5.5)
 
 [node name="RayCast3D2" type="RayCast3D" parent="CameraHing"]
-transform = Transform3D(0.999848, -0.000304586, 0.0174497, 0, 0.999848, 0.0174524, -0.0174524, -0.0174497, 0.999695, 0, 0, 0)
+transform = Transform3D(0.999658, -0.000685233, 0.026168, 0, 0.999658, 0.0261769, -0.026177, -0.026168, 0.999314, 0, 0, 0)
 target_position = Vector3(0, 0, 5.5)
 
 [node name="RayCast3D3" type="RayCast3D" parent="CameraHing"]
-transform = Transform3D(0.999848, -0.000304586, -0.0174497, 0, 0.999848, -0.0174524, 0.0174524, 0.0174497, 0.999695, 0, 0, 0)
+transform = Transform3D(0.999658, -0.000685233, -0.026168, 0, 0.999658, -0.0261769, 0.026177, 0.026168, 0.999314, 0, 0, 0)
 target_position = Vector3(0, 0, 5.5)
 
 [node name="RayCast3D4" type="RayCast3D" parent="CameraHing"]
-transform = Transform3D(0.999848, 0.000304586, -0.0174497, 0, 0.999848, 0.0174524, 0.0174524, -0.0174497, 0.999695, 0, 0, 0)
+transform = Transform3D(0.999658, 0.000685233, -0.026168, 0, 0.999658, 0.0261769, 0.026177, -0.026168, 0.999314, 0, 0, 0)
 target_position = Vector3(0, 0, 5.5)
 
 [node name="Camera3D" type="Camera3D" parent="CameraHing"]
