@@ -22,6 +22,7 @@ DbgDraw="*res://tools/DbgDraw/DbgDraw.cs"
 
 [display]
 
+window/stretch/mode="canvas_items"
 window/vsync/vsync_mode=2
 
 [dotnet]
@@ -108,7 +109,7 @@ shield={
 3d_physics/layer_2="Unclimbable"
 3d_physics/layer_3="Water"
 3d_physics/layer_4="DeathLiquid"
-3d_physics/layer_5="ZTargets"
+3d_physics/layer_5="LookTargets"
 3d_physics/layer_17="Player"
 
 [physics]
@@ -122,6 +123,7 @@ lights_and_shadows/directional_shadow/size=2048
 lights_and_shadows/directional_shadow/soft_shadow_filter_quality=1
 lights_and_shadows/positional_shadow/soft_shadow_filter_quality=1
 global_illumination/gi/use_half_resolution=true
+anti_aliasing/quality/msaa_2d=3
 anti_aliasing/quality/msaa_3d=3
 occlusion_culling/use_occlusion_culling=true
 lights_and_shadows/positional_shadow/atlas_size=2048

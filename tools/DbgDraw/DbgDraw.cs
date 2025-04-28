@@ -251,6 +251,57 @@ public partial class DbgDraw : Node3D
         }
     };
 
+    private class DrawShapeCone : DrawShape {
+        private Transform3D transform;
+        private float length;
+        private float radius;
+        private Color color;
+
+        public DrawShapeCone(Transform3D transform, float length, float radius, Color color) {
+            this.transform = transform;
+            this.length = length;
+            this.radius = radius;
+            this.color = color;
+        }
+
+        public override void Draw(ImmediateMesh im)
+        {
+            const int SEGMENTS = 32;
+
+            im.SurfaceBegin(Mesh.PrimitiveType.LineStrip);
+
+            PushVertex(im, Vector3.Zero, color, transform);
+
+            for (int i = 0; i <= SEGMENTS; i++) {
+                float p = (float)i / (float)SEGMENTS;
+                p *= 2.0f * (float)Math.PI;
+
+                var pos = new Vector3(
+                    (float)Math.Cos(p) * radius,
+                    length,
+                    (float)Math.Sin(p) * radius
+                );
+
+                PushVertex(im, pos, color, transform);
+            }
+
+            im.SurfaceEnd();
+
+            im.SurfaceBegin(Mesh.PrimitiveType.Lines);
+
+            PushVertex(im, Vector3.Zero, color, transform);
+            PushVertex(im, new Vector3(0.0f, length, radius), color, transform);
+
+            PushVertex(im, Vector3.Zero, color, transform);
+            PushVertex(im, new Vector3(0.0f, length, -radius), color, transform);
+
+            PushVertex(im, Vector3.Zero, color, transform);
+            PushVertex(im, new Vector3(-radius, length, 0.0f), color, transform);
+
+            im.SurfaceEnd();
+        }
+    };
+
     private class DrawShapeCapsule : DrawShape {
         private Transform3D transform;
         private float top_radius;
@@ -390,6 +441,17 @@ public partial class DbgDraw : Node3D
         transform.Basis = new Basis(rotation) * transform.Basis;
 
         Cylinder(transform, radius, height, color);
+    }
+
+    static public void Cone(Transform3D transform, float radius, float length, Color color) {
+        draw_shapes.Add(new DrawShapeCone(transform, length, radius, color));
+    }
+
+    static public void Cone(Vector3 position, Quaternion rotation, float radius, float length, Color color) {
+        var transform = Transform3D.Identity;
+        transform.Basis = new Basis(rotation) * transform.Basis;
+        transform.Origin = position;
+        Cone(transform, radius, length, color);
     }
 
     static public void Cylinder(Transform3D transform, float top_radius, float bottom_radius, float height, Color color) {

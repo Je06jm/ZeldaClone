@@ -1,27 +1,62 @@
-[gd_scene load_steps=3 format=3 uid="uid://ev3gyllytct1"]
+[gd_scene load_steps=10 format=3 uid="uid://ev3gyllytct1"]
 
 [ext_resource type="Script" uid="uid://drmkadvqyvoje" path="res://entities/new_player/scripts/CameraHing.cs" id="1_8o0lc"]
+[ext_resource type="Script" uid="uid://okvg116vab8p" path="res://entities/new_player/scripts/new_player.gd" id="1_hgii7"]
+[ext_resource type="Script" uid="uid://b36iyfwsut7bm" path="res://entities/new_player/scripts/Character.cs" id="1_mkd1i"]
+[ext_resource type="Texture2D" uid="uid://ck568d1i112u1" path="res://icon.svg" id="4_hn7vl"]
+[ext_resource type="Shader" uid="uid://dwqh2pl8l3o2a" path="res://entities/new_player/scripts/stamina.gdshader" id="5_ghd1j"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_ldjlr"]
 
-[node name="NewPlayer" type="Node3D"]
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_hgii7"]
+height = 15.3568
+radius = 10.0
 
-[node name="CharacterBody3D" type="CharacterBody3D" parent="."]
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_mkd1i"]
+height = 21.476
+radius = 60.0
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_n7gwt"]
+shader = ExtResource("5_ghd1j")
+shader_parameter/outer_radius = 1.0
+shader_parameter/inner_radius = 0.5
+shader_parameter/available_percentage = 0.535
+shader_parameter/consume_percentage = 0.685
+shader_parameter/default_percentage = 0.925
+shader_parameter/available_color = Color(0, 1, 0, 1)
+shader_parameter/consume_color = Color(1, 0, 0, 1)
+shader_parameter/default_color = Color(0.252028, 0.252028, 0.252028, 1)
+
+[node name="NewPlayer" type="Node3D"]
+script = ExtResource("1_hgii7")
+
+[node name="Character" type="CharacterBody3D" parent="." node_paths=PackedStringArray("hing")]
 collision_layer = 65536
 collision_mask = 3
+script = ExtResource("1_mkd1i")
+hing = NodePath("../CameraHing")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="CharacterBody3D"]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Character"]
 shape = SubResource("CapsuleShape3D_ldjlr")
 
-[node name="CSGBox3D" type="CSGBox3D" parent="CharacterBody3D"]
+[node name="CSGBox3D" type="CSGBox3D" parent="Character"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.490028, -0.456452)
 
-[node name="CSGCylinder3D" type="CSGCylinder3D" parent="CharacterBody3D"]
+[node name="CSGCylinder3D" type="CSGCylinder3D" parent="Character"]
 sides = 32
 
-[node name="CameraHing" type="Node3D" parent="."]
+[node name="TargetSelect" type="Area3D" parent="Character"]
+collision_layer = 0
+collision_mask = 16
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Character/TargetSelect"]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, -3.62147e-07, -8.28497)
+shape = SubResource("CylinderShape3D_hgii7")
+
+[node name="CameraHing" type="Node3D" parent="." node_paths=PackedStringArray("character")]
 script = ExtResource("1_8o0lc")
 margin = 1.5
+character = NodePath("../Character")
 
 [node name="RayCast3D" type="RayCast3D" parent="CameraHing"]
 transform = Transform3D(0.999658, 0.000685233, 0.026168, 0, 0.999658, -0.0261769, -0.026177, 0.026168, 0.999314, 0, 0, 0)
@@ -41,3 +76,25 @@ target_position = Vector3(0, 0, 5.5)
 
 [node name="Camera3D" type="Camera3D" parent="CameraHing"]
 current = true
+
+[node name="TargetSelect" type="Area3D" parent="CameraHing/Camera3D"]
+collision_layer = 0
+collision_mask = 16
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="CameraHing/Camera3D/TargetSelect"]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, -2.31652e-07, -10.7641)
+shape = SubResource("CylinderShape3D_mkd1i")
+
+[node name="TargetIndicator" type="Sprite2D" parent="CameraHing"]
+scale = Vector2(0.296875, 0.296875)
+texture = ExtResource("4_hn7vl")
+
+[node name="Stamina" type="Node2D" parent="."]
+
+[node name="Offset" type="Node2D" parent="Stamina"]
+position = Vector2(102, -124)
+scale = Vector2(0.4, 0.4)
+
+[node name="Base" type="Sprite2D" parent="Stamina/Offset"]
+material = SubResource("ShaderMaterial_n7gwt")
+texture = ExtResource("4_hn7vl")

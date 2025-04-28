@@ -13,13 +13,11 @@
 [ext_resource type="Texture2D" uid="uid://gx4p8quvkls5" path="res://test_00_slot0_normal_roughness.png" id="14_1uj30"]
 [ext_resource type="Script" uid="uid://pudplw10qx21" path="res://levels/test00/CsgSphere3d.cs" id="14_xsgad"]
 [ext_resource type="Texture2D" uid="uid://dc5vptpp1dtib" path="res://test_00_slot1_normal_roughness.png" id="15_ipjch"]
+[ext_resource type="Script" uid="uid://ce873lg1a44r8" path="res://components/LookTarget.cs" id="15_ry12e"]
 [ext_resource type="Texture2D" uid="uid://07rafstg1tj7" path="res://test_00_slot2_normal_roughness.png" id="16_a54bs"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_udyse"]
 size = Vector3(32.3552, 25.4102, 30.7266)
-
-[sub_resource type="SphereShape3D" id="SphereShape3D_7pub6"]
-radius = 0.914208
 
 [sub_resource type="Gradient" id="Gradient_c1tx8"]
 offsets = PackedFloat32Array(0.273585, 0.518868, 0.735849)
@@ -79,16 +77,6 @@ radius = 3.36035
 height = 7.02197
 sides = 32
 
-[node name="CSGBox3D2" type="CSGBox3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.28209, 0)
-
-[node name="Area3D" type="Area3D" parent="CSGBox3D2"]
-collision_layer = 16
-collision_mask = 0
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="CSGBox3D2/Area3D"]
-shape = SubResource("SphereShape3D_7pub6")
-
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("Environment_wpe2l")
 
@@ -126,16 +114,22 @@ shader_params/u_tile_reduction = null
 metadata/_custom_type_script = "uid://yhg3od88m48k"
 
 [node name="NewPlayer" parent="." instance=ExtResource("13_rl2u6")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -6.95762, 0)
-
-[node name="CameraHing" parent="NewPlayer" index="1" node_paths=PackedStringArray("ray_casts", "target_node")]
-ray_casts = []
-target_node = NodePath("../../CSGSphere3D")
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -5.0269, 0)
 
 [node name="CSGSphere3D" type="CSGSphere3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -5.45, -5.16343)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -5.45, 6.39214)
+collision_layer = 16
+collision_mask = 0
 radial_segments = 32
 rings = 32
 script = ExtResource("14_xsgad")
 
-[editable path="NewPlayer"]
+[node name="LookTarget" type="Area3D" parent="CSGSphere3D" node_paths=PackedStringArray("target_indicator_position")]
+collision_layer = 16
+collision_mask = 0
+script = ExtResource("15_ry12e")
+target_indicator_position = NodePath("Marker3D")
+metadata/_custom_type_script = "uid://ce873lg1a44r8"
+
+[node name="Marker3D" type="Marker3D" parent="CSGSphere3D/LookTarget"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.902684, 0)

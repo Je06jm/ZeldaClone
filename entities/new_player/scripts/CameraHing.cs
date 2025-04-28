@@ -9,8 +9,15 @@ public partial class CameraHing : Node3D
     private Vector2 look_dir = Vector2.Zero;
     private Vector2 target_dir = Vector2.Zero;
 
+    public float direction {
+        get { return look_dir.X; }
+    }
+
     private const float LOOK_CHANGE_ALPHA = 0.00001f;
     private const float SPRING_CHANGE_ALPHA = 0.0001f;
+    private const float VERTICAL_CHANGE_ALPHA = 0.00001f;
+    private const float LOCK_LOOK_ANGLE = -0.3f;
+    private const float TARGET_LOCK_LOOK_ANGLE = -0.6f;
 
     [Export]
     private float margin = 0.5f;
@@ -20,7 +27,11 @@ public partial class CameraHing : Node3D
     [Export]
     public Node3D target_node;
 
-    public float last_target_angle = 0.0f;
+    [Export]
+    private Character character = null;
+
+    private float last_target_angle = 0.0f;
+    private float last_target_vertical_angle = 0.0f;
 
     private bool _mouse_captured = false;
 
@@ -38,6 +49,8 @@ public partial class CameraHing : Node3D
         }
     }
 
+    private Sprite2D target_indicator;
+
     public override void _Ready()
     {
         base._Ready();
@@ -48,6 +61,8 @@ public partial class CameraHing : Node3D
         ray_casts.Add(GetNode<RayCast3D>("RayCast3D2"));
         ray_casts.Add(GetNode<RayCast3D>("RayCast3D3"));
         ray_casts.Add(GetNode<RayCast3D>("RayCast3D4"));
+
+        target_indicator = GetNode<Sprite2D>("TargetIndicator");
     }
 
     public override void _Input(InputEvent @event)
@@ -57,29 +72,25 @@ public partial class CameraHing : Node3D
         if (@event.IsClass("InputEventMouseMotion") && mouse_captured) {
             var motion = (InputEventMouseMotion)@event;
 
-            target_dir -= motion.Relative * 0.001f;
+            target_dir -= motion.Relative * 0.001f * GameSettings.mouse_look_speed;
         }
-    }
-
-    private float CalculateTargetAngle(out bool flipped) {
-        var direction = ToLocal(target_node.GlobalPosition);
-
-        var angle = (float)Math.Atan2(direction.X, direction.Z);
-
-        if (Math.Abs(angle) <= ((float)Math.PI / 2.0f)) {
-           angle = 2.0f * (float)Math.PI - angle;
-           flipped = true;
-        }
-        else {
-            angle += (float)Math.PI;
-            flipped = false;
-        }
-
-        return angle;
     }
 
     private float CalculateTargetAngle() {
-        return CalculateTargetAngle(out _);
+        var global_pos_2d = new Vector2(GlobalPosition.X, GlobalPosition.Z);
+        var target_pos_2d = new Vector2(target_node.GlobalPosition.X, target_node.GlobalPosition.Z);
+
+        return (float)Math.PI - global_pos_2d.AngleToPoint(target_pos_2d) + (float)Math.PI / 2.0f;
+    }
+
+    private float CalculateTargetVerticalAngle() {
+        var global_pos_2d = new Vector2(GlobalPosition.X, GlobalPosition.Z);
+        var target_pos_2d = new Vector2(target_node.GlobalPosition.X, target_node.GlobalPosition.Z);
+
+        var dist = global_pos_2d.DistanceTo(target_pos_2d);
+        var height = GlobalPosition.Y - target_node.GlobalPosition.Y;
+
+        return -Vector2.Zero.AngleToPoint(new Vector2(dist, height));
     }
 
     public override void _Process(double delta)
@@ -98,24 +109,28 @@ public partial class CameraHing : Node3D
 
                 last_target_angle = angle;
 
-                target_dir = new Vector2(angle, 0.0f);
+                var virt_angle = CalculateTargetVerticalAngle();
+
+                last_target_vertical_angle = virt_angle;
+
+                target_dir = new Vector2(angle, virt_angle + TARGET_LOCK_LOOK_ANGLE);
             }
             else {
-                target_dir = Vector2.Zero;
+                target_dir = new Vector2(character.target_direction, LOCK_LOOK_ANGLE);
             }
         }
         else if (Input.IsActionPressed("shield") && target_node != null) {
-            bool flipped;
-            var angle = CalculateTargetAngle(out flipped);
+            var angle = CalculateTargetAngle();
 
             var delta_angle = Mathf.AngleDifference(last_target_angle, angle);
             last_target_angle = angle;
 
-            if (flipped) {
-                delta_angle = -delta_angle;
-            }
+            var virt_angle = CalculateTargetVerticalAngle();
 
-            target_dir = target_dir with {X = target_dir.X + delta_angle};
+            var delta_virt_angle = Mathf.AngleDifference(last_target_vertical_angle, virt_angle);
+            last_target_vertical_angle = virt_angle;
+
+            target_dir = target_dir with {X = target_dir.X + delta_angle, Y = target_dir.Y + delta_virt_angle};
         }
 
         look_dir = look_dir with {
@@ -127,6 +142,17 @@ public partial class CameraHing : Node3D
 
         if (Input.IsActionJustPressed("ui_cancel")) {
             mouse_captured = !mouse_captured;
+        }
+
+        if (target_node != null && Input.IsActionPressed("shield")) {
+            target_indicator.Visible = true;
+            var look_target = (LookTarget)target_node;
+            var pos3d = look_target.target_indicator_position.GlobalPosition;
+            var pos2d = camera.UnprojectPosition(pos3d);
+            target_indicator.GlobalPosition = pos2d;
+        }
+        else {
+            target_indicator.Visible = false;
         }
     }
 
@@ -152,5 +178,11 @@ public partial class CameraHing : Node3D
         }
 
         camera.Position = camera.Position.Lerp(target_pos, 1.0f - (float)Math.Pow(SPRING_CHANGE_ALPHA, delta));
+
+        Position = Position with {
+            X = character.Position.X,
+            Z = character.Position.Z,
+            Y = Mathf.Lerp(Position.Y, character.Position.Y, 1.0f - (float)Math.Pow(VERTICAL_CHANGE_ALPHA, delta))
+        };
     }
 }

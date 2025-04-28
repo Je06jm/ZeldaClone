@@ -11,6 +11,9 @@ public partial class CsgSphere3d : CsgSphere3D
 
         time += (float)delta;
 
-        Position = Position with {X = (float)Math.Sin(time)};
+        Position = Position with {
+            X = (float)Math.Sin(time),
+            Y = (float)Math.Cos(time)
+        };
     }
 }
