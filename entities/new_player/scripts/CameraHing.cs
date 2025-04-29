@@ -18,6 +18,7 @@ public partial class CameraHing : Node3D
     private const float VERTICAL_CHANGE_ALPHA = 0.00001f;
     private const float LOCK_LOOK_ANGLE = -0.3f;
     private const float TARGET_LOCK_LOOK_ANGLE = -0.6f;
+    private const float MOVE_LOOK_ANGLE_DELTA = 0.6f;
 
     [Export]
     private float margin = 0.5f;
@@ -55,12 +56,12 @@ public partial class CameraHing : Node3D
     {
         base._Ready();
 
-        camera = GetNode<Camera3D>("Camera3D");
+        camera = GetNode<Camera3D>("Offset/Camera3D");
 
-        ray_casts.Add(GetNode<RayCast3D>("RayCast3D"));
-        ray_casts.Add(GetNode<RayCast3D>("RayCast3D2"));
-        ray_casts.Add(GetNode<RayCast3D>("RayCast3D3"));
-        ray_casts.Add(GetNode<RayCast3D>("RayCast3D4"));
+        ray_casts.Add(GetNode<RayCast3D>("Offset/RayCast3D"));
+        ray_casts.Add(GetNode<RayCast3D>("Offset/RayCast3D2"));
+        ray_casts.Add(GetNode<RayCast3D>("Offset/RayCast3D3"));
+        ray_casts.Add(GetNode<RayCast3D>("Offset/RayCast3D4"));
 
         target_indicator = GetNode<Sprite2D>("TargetIndicator");
     }
@@ -97,12 +98,6 @@ public partial class CameraHing : Node3D
     {
         base._Process(delta);
 
-        var look_delta = Input.GetVector("look_right", "look_left", "look_down", "look_up");
-
-        target_dir += look_delta * 0.01f;
-
-        target_dir.Y = Math.Clamp(target_dir.Y, (float)-Math.PI / 2.5f, (float)Math.PI / 4.0f);
-
         if (Input.IsActionJustPressed("shield")) {
             if (target_node != null) {
                 var angle = CalculateTargetAngle();
@@ -132,6 +127,28 @@ public partial class CameraHing : Node3D
 
             target_dir = target_dir with {X = target_dir.X + delta_angle, Y = target_dir.Y + delta_virt_angle};
         }
+        else {
+            var look_delta = Input.GetVector("look_right", "look_left", "look_down", "look_up");
+
+            target_dir += look_delta * 0.01f;
+
+            if (!Input.IsActionPressed("shield")) {
+                var movement = Input.GetVector("left", "right", "forward", "backward");
+
+                if (movement != Vector2.Zero) {
+                    var move_amount = movement.Dot(Vector2.Up);
+                    move_amount = -((move_amount - 1.0f) / 2.0f);
+
+                    if (movement.X < 0.0f) {
+                        move_amount = -move_amount;
+                    }
+
+                    target_dir = target_dir with {X = target_dir.X -move_amount * MOVE_LOOK_ANGLE_DELTA * (float)delta};
+                }
+            }
+        }
+
+        target_dir.Y = Math.Clamp(target_dir.Y, (float)-Math.PI / 2.5f, (float)Math.PI / 4.0f);
 
         look_dir = look_dir with {
             X = Mathf.LerpAngle(look_dir.X, target_dir.X, 1.0f - (float)Math.Pow(LOOK_CHANGE_ALPHA, delta)),
@@ -145,11 +162,19 @@ public partial class CameraHing : Node3D
         }
 
         if (target_node != null && Input.IsActionPressed("shield")) {
-            target_indicator.Visible = true;
             var look_target = (LookTarget)target_node;
             var pos3d = look_target.target_indicator_position.GlobalPosition;
-            var pos2d = camera.UnprojectPosition(pos3d);
-            target_indicator.GlobalPosition = pos2d;
+
+            var dir_to = camera.GlobalPosition.DirectionTo(pos3d);
+
+            if (dir_to.Dot(-camera.GlobalBasis.Z) < 0.0f) {
+                target_indicator.Visible = false;
+            }
+            else {
+                target_indicator.Visible = true;
+                var pos2d = camera.UnprojectPosition(pos3d);
+                target_indicator.GlobalPosition = pos2d;
+            }
         }
         else {
             target_indicator.Visible = false;
