@@ -106,9 +106,10 @@ public partial class ComboDetector : Node
 
             is_joy = true;
         }
-        else if (!@event.IsPressed()) {
+        else if (!@event.IsPressed() || @event.IsEcho()) {
             return;
         }
+
 
         foreach (var action in actions) {
             if (InputMap.ActionHasEvent(action, @event)) {

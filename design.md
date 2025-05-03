@@ -33,6 +33,7 @@
 11. [Hardware](#hardware)
 12. [Intro](#intro)
 13. [Post Game](#post-game)
+14. [Visuals](#visuals)
 
 ## Target Systems
 * PC (With or without controller)
@@ -54,6 +55,7 @@
 * Legend of Zelda: Tears of the Kingdom
 * Nier Replicant
 * Nier Automata
+* Genshin Impact
 
 [Index](#index)
 
@@ -234,5 +236,10 @@ really beat up and abandoned.
 ## Post Game
 Player get's to see how things improved since their brother was defeated. We
 also get's to see how her and girlfriend has built their lives together.
+
+[Index](#index)
+
+## Visuals
+Going for a anima type of graphics, such as what Genshin Impact or the Legend of Zelda games have.
 
 [Index](#index)

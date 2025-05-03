@@ -8,6 +8,7 @@ public partial class Character : CharacterBody3D
     private enum State {
         Idle,
         Walking,
+        Jumped,
         InAir,
         Crouch,
         Shield,
@@ -66,19 +67,27 @@ public partial class Character : CharacterBody3D
     private const float CROUCH_SPEED = 2.0f;
 
     private const float SHIELD_SPEED = 3.25f;
-    private const float FLYING_SPEED = 5.0f;
-    private const float FLYING_SPRINT_SPEED = 8.0f;
-    private const float FLYING_HEIGHT_SPEED = 3.0f;
-    private const float FLYING_HEIGHT_SPRINT_SPEED = 4.0f;
+    private const float FLYING_SPEED = 2.5f;
+    private const float FLYING_SPRINT_SPEED = 4.0f;
+    private const float FLYING_HEIGHT_SPEED = 1.0f;
+    private const float FLYING_HEIGHT_SPRINT_SPEED = 1.75f;
 
     
     private const float SPRINT_STAMINA = 5.0f;
     private const float FLOAT_STAMINA = 5.0f;
-    private const float FLYING_MAX_STAMINA = 10.0f;
+    private const float FLYING_MAX_STAMINA = 7.0f;
     private const float FLYING_MIN_STAMINA = 5.0f;
     private const float FLYING_SPRINT_ADDITIONAL_STAMINA = 1.0f;
 
     private const float MAX_FLOAT_FALL_SPEED = -1.0f;
+
+    private const float JUMP_FORCE = 7.0f;
+
+    [Export]
+    public bool has_skill_floating = false;
+    
+    [Export]
+    public bool has_skill_flying = false;
 
     private enum Combo {
         None,
@@ -172,7 +181,7 @@ public partial class Character : CharacterBody3D
                     state = State.InAir;
                 }
                 else if (jump_just_pressed) {
-                    state = State.InAir;
+                    state = State.Jumped;
                 }
                 else if (attacked) {
                     state = State.Attack;
@@ -193,7 +202,7 @@ public partial class Character : CharacterBody3D
                     state = State.InAir;
                 }
                 else if (jump_just_pressed) {
-                    state = State.InAir;
+                    state = State.Jumped;
                 }
                 else if (attacked) {
                     state = State.Attack;
@@ -209,6 +218,10 @@ public partial class Character : CharacterBody3D
                 }
                 break;
 
+            case State.Jumped:
+                state = State.InAir;
+                break;
+
             case State.InAir:
                 if (on_floor) {
                     state = State.Idle;
@@ -216,10 +229,10 @@ public partial class Character : CharacterBody3D
                 else if (shield_pressed) {
                     state = State.InAirShield;
                 }
-                else if (crouch_pressed && !stamina.IsTired) {
+                else if (crouch_pressed && !stamina.IsTired && has_skill_floating) {
                     state = State.Float;
                 }
-                else if (started_flying && !stamina.IsTired) {
+                else if (started_flying && !stamina.IsTired && has_skill_flying) {
                     state = State.Flying;
                 }
                 break;
@@ -253,7 +266,7 @@ public partial class Character : CharacterBody3D
                     state = State.InAir;
                 }
                 else if (jump_just_pressed) {
-                    state = State.InAir;
+                    state = State.Jumped;
                 }
                 else if (attacked) {
                     state = State.Attack;
@@ -271,7 +284,7 @@ public partial class Character : CharacterBody3D
                     state = State.InAirShield;
                 }
                 else if (jump_just_pressed) {
-                    state = State.InAirShield;
+                    state = State.Jumped;
                 }
                 else if (attacked) {
                     state = State.Attack;
@@ -284,6 +297,9 @@ public partial class Character : CharacterBody3D
             case State.InAirShield:
                 if (on_floor) {
                     state = State.Shield;
+                }
+                else if (started_flying) {
+                    state = State.Flying;
                 }
                 else if (!shield_pressed) {
                     state = State.InAir;
@@ -351,16 +367,14 @@ public partial class Character : CharacterBody3D
             case State.Walking:
                 if (is_moving) {
                     if (stamina.IsTired) {
-                        target_velocity = root_motion / delta;
-                        //target_velocity = forward * TIRED_SPEED * movement.Length();
+                        target_velocity = root_motion;
                     }
                     else if (is_sprinting) {
-                        target_velocity = forward * SPRINT_SPEED;
+                        target_velocity = root_motion;
                         stamina.drainage = SPRINT_STAMINA;
                     }
                     else {
-                        target_velocity = root_motion / delta;
-                        //target_velocity = forward * WALK_SPEED * movement.Length();
+                        target_velocity = root_motion;
                     }
                 }
                 else {
@@ -425,6 +439,10 @@ public partial class Character : CharacterBody3D
                 break;
             }
 
+            case State.Jumped:
+                saved_grav = JUMP_FORCE;
+                break;
+
             case State.InAirShield:
                 break;
 
@@ -432,11 +450,6 @@ public partial class Character : CharacterBody3D
                 throw new NotImplementedException();
         }
 
-        if (Input.IsActionJustPressed("jump") && IsOnFloor()) {
-            saved_grav = 10.0f;
-        }
-
-        target_velocity = root_motion;
         root_motion = Vector3.Zero;
 
         Velocity = Velocity.Lerp(target_velocity, 1.0f - (float)Math.Pow(VELOCITY_LERP_ALPHA, delta));
@@ -474,7 +487,34 @@ public partial class Character : CharacterBody3D
         local_motion = local_motion.Rotated(Vector3.Up, direction);
         root_motion += local_motion / (float)delta;
 
-        animation_tree.Set("parameters/Walking/Movement/blend_position", movement.Length());
+        {
+            var blend = movement.Length();
+
+            if (Input.IsActionPressed("sprint")) {
+                blend = 2.0f;
+            }
+
+            animation_tree.Set("parameters/Walking/Movement/blend_position", blend);
+        }
+
+        if (state == State.Jumped) {
+            animation_tree.Set("parameters/conditions/jumped", true);
+        }
+        else {
+            animation_tree.Set("parameters/conditions/jumped", false);
+        }
+
+        if (IsOnFloor()) {
+            animation_tree.Set("parameters/conditions/landed", true);
+            animation_tree.Set("parameters/conditions/falling", false);
+        }
+        else {
+            animation_tree.Set("parameters/conditions/landed", false);
+
+            if (state != State.Jumped) {
+                animation_tree.Set("parameters/conditions/falling", true);
+            }
+        }
 
         var move_norm = movement.Normalized();
 
