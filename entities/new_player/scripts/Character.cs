@@ -351,7 +351,7 @@ public partial class Character : CharacterBody3D
             case State.Walking:
                 if (is_moving) {
                     if (stamina.IsTired) {
-                        target_velocity = root_motion;
+                        target_velocity = root_motion / delta;
                         //target_velocity = forward * TIRED_SPEED * movement.Length();
                     }
                     else if (is_sprinting) {
@@ -359,7 +359,7 @@ public partial class Character : CharacterBody3D
                         stamina.drainage = SPRINT_STAMINA;
                     }
                     else {
-                        target_velocity = root_motion;
+                        target_velocity = root_motion / delta;
                         //target_velocity = forward * WALK_SPEED * movement.Length();
                     }
                 }
@@ -470,7 +470,15 @@ public partial class Character : CharacterBody3D
             crouching_model.Visible = false;
         }
 
-        root_motion += animation_tree.GetRootMotionPosition();
+        var local_motion = animation_tree.GetRootMotionPosition();
+        local_motion = local_motion.Rotated(Vector3.Up, direction);
+        root_motion += local_motion / (float)delta;
+
+        animation_tree.Set("parameters/Walking/Movement/blend_position", movement.Length());
+
+        var move_norm = movement.Normalized();
+
+        animation_tree.Set("parameters/Walking/Lean/blend_position", move_norm.Dot(Vector2.Right));
     }
 
 

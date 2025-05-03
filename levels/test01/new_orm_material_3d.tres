@@ -1,0 +1,7 @@
+[gd_resource type="ORMMaterial3D" load_steps=2 format=3 uid="uid://dbbsk1plll77u"]
+
+[sub_resource type="PlaceholderTexture2D" id="PlaceholderTexture2D_70dib"]
+size = Vector2(512, 512)
+
+[resource]
+albedo_texture = SubResource("PlaceholderTexture2D_70dib")

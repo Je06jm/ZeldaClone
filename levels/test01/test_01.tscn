@@ -1,0 +1,95 @@
+[gd_scene load_steps=4 format=3 uid="uid://c3eaw6g00frte"]
+
+[ext_resource type="PackedScene" uid="uid://4ted0bth76pn" path="res://entities/new_player/model/hero.blend" id="1_j2peu"]
+[ext_resource type="Script" uid="uid://q51l1td51tq8" path="res://levels/test01/hero.gd" id="2_apvxy"]
+[ext_resource type="Material" uid="uid://dbbsk1plll77u" path="res://levels/test01/new_orm_material_3d.tres" id="3_ji8u8"]
+
+[node name="Test01" type="Node3D"]
+
+[node name="hero" parent="." instance=ExtResource("1_j2peu")]
+script = ExtResource("2_apvxy")
+
+[node name="GeneralSkeleton" parent="hero/metarig" index="0"]
+bones/0/position = Vector3(2.48574e-07, -0.0157244, -0.11619)
+bones/0/rotation = Quaternion(0, -2.84217e-14, 8.52651e-14, 1)
+bones/1/position = Vector3(-2.46399e-08, 0.400292, -0.0756195)
+bones/1/rotation = Quaternion(0, 8.52651e-14, -1.42109e-13, 1)
+bones/2/rotation = Quaternion(3.43824e-14, -0.0397345, 5.66504e-08, 0.99921)
+bones/3/rotation = Quaternion(-1.49012e-08, -1.11759e-08, -1.49012e-08, 1)
+bones/4/rotation = Quaternion(0.125673, -0.124525, 0.984191, 0.00825071)
+bones/5/rotation = Quaternion(0.0418791, 0.966511, 0.252885, 0.012359)
+bones/6/rotation = Quaternion(-0.0868881, 0.781652, -0.612474, -0.0796703)
+bones/7/rotation = Quaternion(-0.00129134, 0.999594, -0.0284439, 0.00105548)
+bones/8/rotation = Quaternion(2.98026e-08, -0.0397344, 5.60335e-08, 0.99921)
+bones/9/rotation = Quaternion(1.49012e-08, -3.72529e-08, -4.47035e-08, 1)
+bones/10/rotation = Quaternion(-0.0643611, -0.329619, 0.941916, 0.00187719)
+bones/11/rotation = Quaternion(-0.11427, 0.713803, 0.690138, -0.0337303)
+bones/12/rotation = Quaternion(0.14967, 0.760212, -0.626018, 0.0881934)
+bones/13/rotation = Quaternion(0.00042218, 0.999957, -0.00929924, -0.000345063)
+bones/14/rotation = Quaternion(-0.0936244, 0.000319803, -0.00340244, 0.995602)
+bones/15/rotation = Quaternion(-0.00683329, 1.0468e-10, 1.55115e-09, 0.999977)
+bones/16/rotation = Quaternion(0.0731001, -7.43722e-05, 0.000586148, 0.997324)
+bones/17/rotation = Quaternion(-2.23517e-08, -1.06667e-11, -3.09903e-11, 1)
+bones/18/rotation = Quaternion(0.496747, 0.502593, 0.504971, -0.495628)
+bones/19/rotation = Quaternion(0.0573075, 0.777687, 0.625499, -0.0258783)
+bones/20/rotation = Quaternion(0.0424583, -0.705137, 0.0600963, 0.705243)
+bones/21/rotation = Quaternion(-0.01288, 0.740345, 0.0866127, 0.6665)
+bones/23/rotation = Quaternion(-2.38872e-08, -3.36565e-09, -0.35567, 0.934612)
+bones/24/rotation = Quaternion(2.98023e-08, 2.98023e-08, 4.47035e-08, 1)
+bones/27/rotation = Quaternion(-1.03366e-08, 4.12647e-10, -0.129684, 0.991555)
+bones/31/rotation = Quaternion(7.08292e-09, -1.84417e-09, 0.136536, 0.990635)
+bones/35/rotation = Quaternion(2.03254e-08, -1.0721e-08, 0.354463, 0.93507)
+bones/38/rotation = Quaternion(0.235823, -0.183384, -0.674816, 0.674819)
+bones/39/rotation = Quaternion(0.682733, 0.693716, -0.020545, 0.228498)
+bones/41/rotation = Quaternion(0.498041, -0.501576, -0.503026, -0.497335)
+bones/42/rotation = Quaternion(-0.0822389, 0.78642, 0.61219, 0.00200809)
+bones/43/rotation = Quaternion(0.0672358, 0.702207, -0.0951672, 0.702373)
+bones/44/rotation = Quaternion(-0.0768283, -0.799927, -0.0688429, 0.591163)
+bones/46/rotation = Quaternion(-4.16027e-08, 1.1619e-08, 0.35567, 0.934612)
+bones/48/rotation = Quaternion(-1.18677e-15, -1.76843e-23, 1.49011e-08, 1)
+bones/51/rotation = Quaternion(-1.75582e-15, -3.14349e-23, 7.45058e-09, 1)
+bones/52/rotation = Quaternion(-1.75582e-15, -2.61637e-23, 1.49012e-08, 1)
+bones/54/rotation = Quaternion(1.7555e-08, -2.88962e-09, -0.136536, 0.990635)
+bones/55/rotation = Quaternion(9.01576e-15, -1.77636e-15, 1.49012e-08, 1)
+bones/56/rotation = Quaternion(1.91033e-15, 1.77636e-15, 1.49012e-08, 1)
+bones/58/rotation = Quaternion(4.06362e-08, 4.01763e-09, -0.354463, 0.93507)
+bones/59/rotation = Quaternion(7.66815e-15, -1.49012e-08, 4.47035e-08, 1)
+bones/61/rotation = Quaternion(0.235823, 0.183384, 0.674816, 0.674819)
+bones/62/rotation = Quaternion(-0.682733, 0.693716, -0.0205451, -0.228498)
+bones/63/rotation = Quaternion(0.0992116, 0.13017, 0.024222, 0.986218)
+bones/65/position = Vector3(0.0878312, 0.184408, -0.0533003)
+bones/65/rotation = Quaternion(0.0299116, -0.0923358, 0.995093, -0.0192419)
+bones/66/position = Vector3(0.0879642, 0.230023, -0.468631)
+bones/66/rotation = Quaternion(0.0040716, 0.728925, -0.684246, 0.0214488)
+bones/67/position = Vector3(-0.0879645, 0.230023, -0.468631)
+bones/67/rotation = Quaternion(-0.00407183, 0.728925, -0.684245, -0.021449)
+bones/68/position = Vector3(-0.123985, 0.683078, 0.229658)
+bones/69/position = Vector3(0.147118, 0.683078, 0.223875)
+bones/69/rotation = Quaternion(0.709027, 0.0343431, 0.0371111, 0.703367)
+bones/70/position = Vector3(-0.0900465, 0.0914017, -0.0784897)
+bones/70/rotation = Quaternion(-0.0219594, -0.413154, 0.909966, 0.0279772)
+bones/71/position = Vector3(0.161228, 0.372065, -0.101146)
+bones/71/rotation = Quaternion(0.664171, -0.0635727, 0.744555, -0.0217827)
+bones/72/position = Vector3(-0.160927, 0.372233, -0.0872768)
+bones/72/rotation = Quaternion(-0.702446, -0.0331274, 0.70633, 0.0810492)
+
+[node name="Cube_001" parent="hero/metarig/GeneralSkeleton" index="0"]
+transform = Transform3D(-0.851228, -0.086448, 0.0405603, -0.0906932, 0.845777, -0.100712, -0.0298851, -0.104378, -0.849659, 0.150208, 0.318517, -0.224077)
+
+[node name="AnimationPlayer" parent="hero" index="1"]
+root_motion_track = NodePath("%GeneralSkeleton:Root")
+root_motion_local = false
+
+[node name="Camera3D" type="Camera3D" parent="hero"]
+transform = Transform3D(1, 0, 0, 0, 0.911884, 0.410448, 0, -0.410448, 0.911884, 0, 1.07604, 1.24632)
+
+[node name="CSGBox3D" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.497811, -4.49243)
+material_override = ExtResource("3_ji8u8")
+size = Vector3(7.2522, 1, 9.98486)
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(-0.258819, -0.683013, 0.683013, 0, 0.707107, 0.707107, -0.965926, 0.183013, -0.183013, 0, 1.68481, 0)
+shadow_enabled = true
+
+[editable path="hero"]
