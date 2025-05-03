@@ -136,7 +136,8 @@ public partial class CameraHing : Node3D
                 var movement = Input.GetVector("left", "right", "forward", "backward");
 
                 if (movement != Vector2.Zero) {
-                    var move_amount = movement.Dot(Vector2.Up);
+                    var move_norm = movement.Normalized();
+                    var move_amount = move_norm.Dot(Vector2.Up);
                     move_amount = -((move_amount - 1.0f) / 2.0f);
 
                     if (movement.X < 0.0f) {

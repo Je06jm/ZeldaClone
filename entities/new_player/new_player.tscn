@@ -1,10 +1,12 @@
-[gd_scene load_steps=10 format=3 uid="uid://ev3gyllytct1"]
+[gd_scene load_steps=15 format=3 uid="uid://ev3gyllytct1"]
 
 [ext_resource type="Script" uid="uid://drmkadvqyvoje" path="res://entities/new_player/scripts/CameraHing.cs" id="1_8o0lc"]
 [ext_resource type="Script" uid="uid://okvg116vab8p" path="res://entities/new_player/scripts/new_player.gd" id="1_hgii7"]
 [ext_resource type="Script" uid="uid://b36iyfwsut7bm" path="res://entities/new_player/scripts/Character.cs" id="1_mkd1i"]
+[ext_resource type="PackedScene" uid="uid://4ted0bth76pn" path="res://entities/new_player/model/hero.blend" id="3_ltny4"]
 [ext_resource type="Texture2D" uid="uid://ck568d1i112u1" path="res://icon.svg" id="4_hn7vl"]
 [ext_resource type="Script" uid="uid://c6lrbbeqscfcc" path="res://entities/new_player/scripts/Stamina.cs" id="5_ghd1j"]
+[ext_resource type="Script" uid="uid://b51jkacer2sh4" path="res://entities/new_player/ComboDetector.cs" id="6_n7gwt"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_ldjlr"]
 
@@ -15,6 +17,17 @@ height = 1.52138
 height = 15.3568
 radius = 10.0
 
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_ltny4"]
+animation = &"Walk"
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_ylbu0"]
+advance_mode = 2
+
+[sub_resource type="AnimationNodeStateMachine" id="AnimationNodeStateMachine_ulddb"]
+states/Walk/node = SubResource("AnimationNodeAnimation_ltny4")
+states/Walk/position = Vector2(324, 100)
+transitions = ["Start", "Walk", SubResource("AnimationNodeStateMachineTransition_ylbu0")]
+
 [sub_resource type="CylinderShape3D" id="CylinderShape3D_mkd1i"]
 height = 21.476
 radius = 60.0
@@ -22,12 +35,13 @@ radius = 60.0
 [node name="NewPlayer" type="Node3D"]
 script = ExtResource("1_hgii7")
 
-[node name="Character" type="CharacterBody3D" parent="." node_paths=PackedStringArray("hing", "stamina")]
+[node name="Character" type="CharacterBody3D" parent="." node_paths=PackedStringArray("hing", "stamina", "combo_detector")]
 collision_layer = 65536
 collision_mask = 3
 script = ExtResource("1_mkd1i")
 hing = NodePath("../CameraHing")
 stamina = NodePath("../Stamina")
+combo_detector = NodePath("../ComboDetector")
 
 [node name="StandingCollision" type="CollisionShape3D" parent="Character"]
 shape = SubResource("CapsuleShape3D_ldjlr")
@@ -52,12 +66,20 @@ double_sided = false
 text = "Test"
 font_size = 50
 
-[node name="StandingModel" type="Node3D" parent="Character"]
+[node name="Combos" type="Label3D" parent="Character"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.82297, 0)
+billboard = 1
+double_sided = false
+text = "[jump, jump]"
+font_size = 50
 
-[node name="CSGBox3D" type="CSGBox3D" parent="Character/StandingModel"]
+[node name="StandingModel2" type="Node3D" parent="Character"]
+visible = false
+
+[node name="CSGBox3D" type="CSGBox3D" parent="Character/StandingModel2"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.490028, -0.456452)
 
-[node name="CSGCylinder3D" type="CSGCylinder3D" parent="Character/StandingModel"]
+[node name="CSGCylinder3D" type="CSGCylinder3D" parent="Character/StandingModel2"]
 sides = 32
 
 [node name="CrouchingModel" type="Node3D" parent="Character"]
@@ -70,6 +92,79 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.00258067, -0.456452)
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.250244, 0)
 height = 1.49951
 sides = 32
+
+[node name="StandingModel" parent="Character" instance=ExtResource("3_ltny4")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -6)
+
+[node name="GeneralSkeleton" parent="Character/StandingModel/metarig" index="0"]
+bones/0/position = Vector3(-2.86433e-06, 0.00340033, -0.57306)
+bones/1/position = Vector3(-1.37666e-12, 3.87547, 0.756195)
+bones/2/rotation = Quaternion(-2.14266e-08, 0.0389534, -5.3079e-08, 0.999241)
+bones/3/rotation = Quaternion(2.23517e-08, 5.96046e-08, 0, 1)
+bones/4/rotation = Quaternion(0.0517467, -0.001614, 0.998515, -0.0169661)
+bones/5/rotation = Quaternion(-0.0744288, 0.889935, -0.449436, 0.0219648)
+bones/6/rotation = Quaternion(-0.0839875, 0.597949, -0.789916, -0.106939)
+bones/7/rotation = Quaternion(0.000791736, 0.999847, -0.0174405, 0.000647158)
+bones/8/rotation = Quaternion(6.23801e-08, 0.0389533, -3.70035e-09, 0.999241)
+bones/9/rotation = Quaternion(1.49012e-08, 1.86264e-08, 7.45058e-08, 1)
+bones/10/rotation = Quaternion(-0.160731, 0.287949, 0.944019, -0.0089119)
+bones/11/rotation = Quaternion(0.0248615, 0.988323, -0.150152, -0.00733871)
+bones/12/rotation = Quaternion(0.0848207, 0.776914, -0.60932, 0.133939)
+bones/13/rotation = Quaternion(2.08794e-05, 1, 0.00045991, 1.70663e-05)
+bones/14/rotation = Quaternion(0.0933767, -6.05429e-11, -7.32205e-10, 0.995631)
+bones/15/rotation = Quaternion(0.00490266, -1.67365e-10, -1.15711e-09, 0.999988)
+bones/16/rotation = Quaternion(-0.0710859, -3.36341e-10, 1.32097e-09, 0.99747)
+bones/17/rotation = Quaternion(-2.23517e-08, -1.86517e-13, -3.06599e-11, 1)
+bones/18/rotation = Quaternion(0.479841, 0.522389, 0.511417, -0.485094)
+bones/19/rotation = Quaternion(0.016467, 0.790745, -0.61107, 0.0323336)
+bones/20/rotation = Quaternion(0.219219, -0.681351, 0.154879, 0.680967)
+bones/21/rotation = Quaternion(0.0220945, 0.651316, -0.0317841, 0.757819)
+bones/23/rotation = Quaternion(1.65621e-10, 2.82888e-08, -0.355669, 0.934612)
+bones/31/rotation = Quaternion(4.45065e-10, -3.2291e-09, 0.136536, 0.990635)
+bones/35/rotation = Quaternion(2.64095e-09, -6.96681e-09, 0.354463, 0.93507)
+bones/38/rotation = Quaternion(0.183384, 0.235823, 0.674819, 0.674816)
+bones/39/rotation = Quaternion(0.682733, 0.693716, -0.020545, 0.228498)
+bones/40/rotation = Quaternion(0.0992116, -0.13017, -0.024222, 0.986218)
+bones/41/rotation = Quaternion(0.507224, -0.491741, -0.495658, -0.505211)
+bones/42/rotation = Quaternion(-0.00781862, 0.793219, -0.601839, 0.0923657)
+bones/43/rotation = Quaternion(0.177196, 0.690419, -0.125189, 0.690109)
+bones/44/rotation = Quaternion(0.0129201, -0.588124, 0.119942, 0.799723)
+bones/46/rotation = Quaternion(1.27529e-08, -3.35113e-08, 0.35567, 0.934612)
+bones/47/rotation = Quaternion(-8.40272e-15, -2.98023e-08, -1.49012e-08, 1)
+bones/54/rotation = Quaternion(2.03455e-09, 1.47616e-08, -0.136536, 0.990635)
+bones/58/rotation = Quaternion(1.08939e-08, 2.87381e-08, -0.354463, 0.93507)
+bones/59/rotation = Quaternion(1.49012e-08, 6.66134e-15, 4.47035e-08, 1)
+bones/61/rotation = Quaternion(0.183384, -0.235823, -0.674819, 0.674816)
+bones/62/rotation = Quaternion(-0.682733, 0.693716, -0.020545, -0.228498)
+bones/65/position = Vector3(-0.880449, 0.911782, 2.14691)
+bones/65/rotation = Quaternion(0.895512, -0.0287019, -0.0210034, 0.443614)
+bones/66/position = Vector3(-0.879643, 2.30023, 4.68631)
+bones/66/rotation = Quaternion(0.684245, -0.0214478, 0.00407272, 0.728925)
+bones/67/position = Vector3(0.879643, 2.30023, 4.68632)
+bones/67/rotation = Quaternion(0.684245, 0.0214478, -0.00407273, 0.728925)
+bones/68/position = Vector3(1.23985, 6.83078, -2.29658)
+bones/68/rotation = Quaternion(0.0371112, -0.703367, 0.709027, -0.034343)
+bones/69/position = Vector3(-1.47118, 6.83078, -2.23875)
+bones/69/rotation = Quaternion(-0.0371112, -0.703367, 0.709027, 0.034343)
+bones/70/position = Vector3(0.880596, 1.45887, -0.549741)
+bones/70/rotation = Quaternion(0.994387, 0.0194613, 0.0297692, 0.0996481)
+bones/71/position = Vector3(-1.61228, 3.67683, 0.518478)
+bones/71/rotation = Quaternion(0.747237, 0.0404619, -0.663295, -0.0063775)
+bones/72/position = Vector3(1.60927, 3.72819, 1.35565)
+bones/72/rotation = Quaternion(-0.697448, -0.163603, -0.68792, -0.116478)
+
+[node name="Cube_001" parent="Character/StandingModel/metarig/GeneralSkeleton" index="0"]
+transform = Transform3D(0.851307, 0.0836784, -0.0445128, -0.0932358, 0.811679, -0.257278, 0.0170464, 0.260543, 0.815803, -1.50108, 3.2955, -0.0574569)
+
+[node name="AnimationTree" type="AnimationTree" parent="Character"]
+root_node = NodePath("../StandingModel")
+root_motion_track = NodePath("%GeneralSkeleton:Root")
+root_motion_local = false
+tree_root = SubResource("AnimationNodeStateMachine_ulddb")
+anim_player = NodePath("../StandingModel/AnimationPlayer")
+
+[node name="RootMotionView" type="RootMotionView" parent="Character"]
+animation_path = NodePath("../AnimationTree")
 
 [node name="CameraHing" type="Node3D" parent="." node_paths=PackedStringArray("character")]
 script = ExtResource("1_8o0lc")
@@ -110,7 +205,7 @@ shape = SubResource("CylinderShape3D_mkd1i")
 scale = Vector2(0.296875, 0.296875)
 texture = ExtResource("4_hn7vl")
 
-[node name="Stamina" type="Control" parent="."]
+[node name="Stamina" type="Control" parent="." node_paths=PackedStringArray("character")]
 layout_mode = 3
 anchors_preset = 8
 anchor_left = 0.5
@@ -124,6 +219,7 @@ offset_bottom = 20.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("5_ghd1j")
+character = NodePath("../Character")
 
 [node name="Value" type="ProgressBar" parent="Stamina"]
 layout_mode = 1
@@ -145,3 +241,15 @@ show_percentage = false
 [node name="StartRecovery" type="Timer" parent="Stamina"]
 wait_time = 0.75
 one_shot = true
+
+[node name="ComboDetector" type="Node" parent="." node_paths=PackedStringArray("label")]
+script = ExtResource("6_n7gwt")
+label = NodePath("../Character/Combos")
+
+[node name="Timer" type="Timer" parent="ComboDetector"]
+wait_time = 0.2
+one_shot = true
+
+[node name="RootMotionView" type="RootMotionView" parent="."]
+
+[editable path="Character/StandingModel"]

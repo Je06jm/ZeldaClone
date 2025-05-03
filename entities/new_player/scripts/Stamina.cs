@@ -33,7 +33,7 @@ public partial class Stamina : Control
                 is_recovering = false;
                 start_recovery.Stop();
             }
-            else if (start_recovery.IsStopped()) {
+            else if (start_recovery.IsStopped() && character.IsOnFloor()) {
                 start_recovery.Start();
             }
         }
@@ -49,7 +49,10 @@ public partial class Stamina : Control
 
     private Timer start_recovery;
 
-    public bool is_tired {
+    [Export]
+    private Character character;
+
+    public bool IsTired {
         get { return forced_recovery || current == 0.0f; }
     }
 
@@ -70,8 +73,8 @@ public partial class Stamina : Control
     {
         base._Process(delta);
 
-        if (is_tired) {
-            if (start_recovery.IsStopped()) {
+        if (IsTired) {
+            if (start_recovery.IsStopped() && character.IsOnFloor()) {
                 start_recovery.Start();
             }
         }
@@ -79,7 +82,7 @@ public partial class Stamina : Control
             current -= drainage * (float)delta;
         }
 
-        if (is_recovering) {
+        if (is_recovering && character.IsOnFloor()) {
             current += recovery_rate * (float)delta;
         }
     }

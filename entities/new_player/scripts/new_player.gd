@@ -38,3 +38,9 @@ func _process(_delta: float) -> void:
     var pos2d: Vector2 = $CameraHing/Offset/Camera3D.unproject_position(pos3d)
     
     $Stamina.global_position = pos2d
+
+    if Input.is_action_just_pressed("dbg_save"):
+        SaveGame.Save(false)
+
+    if Input.is_action_just_pressed("dbg_load"):
+        SaveGame.Load(0)

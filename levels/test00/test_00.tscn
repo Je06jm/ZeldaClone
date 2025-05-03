@@ -1,4 +1,4 @@
-[gd_scene load_steps=24 format=3 uid="uid://cl2tlybu11gy8"]
+[gd_scene load_steps=25 format=3 uid="uid://cl2tlybu11gy8"]
 
 [ext_resource type="Material" uid="uid://dg6tbjuf0idrc" path="res://levels/test00/basic_water.tres" id="2_tk752"]
 [ext_resource type="Material" uid="uid://bhjf4ki6t6d52" path="res://levels/test00/basic_danger_water.tres" id="3_tk752"]
@@ -15,6 +15,7 @@
 [ext_resource type="Texture2D" uid="uid://dc5vptpp1dtib" path="res://test_00_slot1_normal_roughness.png" id="15_ipjch"]
 [ext_resource type="Script" uid="uid://ce873lg1a44r8" path="res://components/LookTarget.cs" id="15_ry12e"]
 [ext_resource type="Texture2D" uid="uid://07rafstg1tj7" path="res://test_00_slot2_normal_roughness.png" id="16_a54bs"]
+[ext_resource type="PackedScene" uid="uid://do5yf2mx4myx0" path="res://entities/test_save/test_save.tscn" id="16_v7f34"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_udyse"]
 size = Vector3(32.3552, 25.4102, 30.7266)
@@ -133,3 +134,6 @@ metadata/_custom_type_script = "uid://ce873lg1a44r8"
 
 [node name="Marker3D" type="Marker3D" parent="CSGSphere3D/LookTarget"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.902684, 0)
+
+[node name="TestSave" parent="." instance=ExtResource("16_v7f34")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12.3899, -1.50583, 10.6079)

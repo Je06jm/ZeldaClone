@@ -1,5 +1,6 @@
 using Godot;
 using System;
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
 public partial class Character : CharacterBody3D
@@ -12,8 +13,8 @@ public partial class Character : CharacterBody3D
         Shield,
         InAirShield,
         Swimming,
-        Climbing,
         Flying,
+        Float,
         Attack
     };
 
@@ -52,18 +53,58 @@ public partial class Character : CharacterBody3D
     private Node3D standing_model;
     private Node3D crouching_model;
 
+    [Export]
+    private ComboDetector combo_detector;
+
     private const float VELOCITY_LERP_ALPHA = 0.001f;
 
     private const float TIRED_SPEED = 3.0f;
     private const float WALK_SPEED = 4.5f;
     private const float SPRINT_SPEED = 6.0f;
+    private const float FLOAT_SPEED = 2.5f;
 
     private const float CROUCH_SPEED = 2.0f;
 
     private const float SHIELD_SPEED = 3.25f;
+    private const float FLYING_SPEED = 5.0f;
+    private const float FLYING_SPRINT_SPEED = 8.0f;
+    private const float FLYING_HEIGHT_SPEED = 3.0f;
+    private const float FLYING_HEIGHT_SPRINT_SPEED = 4.0f;
 
     
-    private const float SPRINT_STAMINA = 25.0f;
+    private const float SPRINT_STAMINA = 5.0f;
+    private const float FLOAT_STAMINA = 5.0f;
+    private const float FLYING_MAX_STAMINA = 10.0f;
+    private const float FLYING_MIN_STAMINA = 5.0f;
+    private const float FLYING_SPRINT_ADDITIONAL_STAMINA = 1.0f;
+
+    private const float MAX_FLOAT_FALL_SPEED = -1.0f;
+
+    private enum Combo {
+        None,
+        SimpleLight,
+        SimpleHeavy,
+        SimpleRange
+    };
+
+    private Dictionary<Combo, float> combo_stamina_cost = new Dictionary<Combo, float>(){
+        {Combo.None, 0.0f},
+        {Combo.SimpleLight, 1.0f},
+        {Combo.SimpleHeavy, 5.0f},
+        {Combo.SimpleRange, 10.0f}
+    };
+
+    private List<Tuple<string[], Combo>> combo_actions = new List<Tuple<string[], Combo>>{
+        new Tuple<string[], Combo>(["combo_light"], Combo.SimpleLight),
+        new Tuple<string[], Combo>(["combo_heavy"], Combo.SimpleHeavy),
+        new Tuple<string[], Combo>(["combo_range"], Combo.SimpleRange)
+    };
+
+    private Combo last_combo = Combo.None;
+
+    private AnimationTree animation_tree;
+
+    private Vector3 root_motion;
 
     public override void _Ready()
     {
@@ -76,15 +117,54 @@ public partial class Character : CharacterBody3D
 
         standing_model = GetNode<Node3D>("StandingModel");
         crouching_model = GetNode<Node3D>("CrouchingModel");
+
+        combo_detector.ComboFinalize += () => { ProcessCombos(); };
+
+        animation_tree = GetNode<AnimationTree>("AnimationTree");
+    }
+
+    private void ProcessCombos() {
+        Combo best_combo = Combo.None;
+        int best_idx = int.MaxValue;
+
+        for (int i = 0; i < combo_actions.Count; i++) {
+            var (actions, combo) = combo_actions[i];
+
+            var idx = combo_detector.GetCombo(actions);
+
+            if (idx != -1 && idx < best_idx) {
+                best_idx = idx;
+                best_combo = combo;
+            }
+        }
+
+        if (best_idx == 0) {
+            last_combo = best_combo;
+        }
     }
 
     private void UpdateState(Vector2 movement) {
         var is_moving = movement != Vector2.Zero;
         var crouch_pressed = Input.IsActionPressed("crouch");
-        var sprint_pressed = Input.IsActionPressed("sprint");
         var jump_just_pressed = Input.IsActionJustPressed("jump");
         var shield_pressed = Input.IsActionPressed("shield");
         var on_floor = IsOnFloor();
+
+        var attacked = last_combo != Combo.None;
+
+        var started_flying = false;
+
+        {
+            var idx = combo_detector.GetButtonCombo(["combo_jump", "combo_jump"]);
+
+            if (idx == 0) {
+                started_flying = true;
+            }
+
+            if (started_flying) {
+                combo_detector.RemoveButtonComboHistory(2);
+            }
+        }
 
         switch (state) {
             case State.Idle:
@@ -94,6 +174,9 @@ public partial class Character : CharacterBody3D
                 else if (jump_just_pressed) {
                     state = State.InAir;
                 }
+                else if (attacked) {
+                    state = State.Attack;
+                }
                 else if (crouch_pressed) {
                     state = State.Crouch;
                 }
@@ -101,7 +184,6 @@ public partial class Character : CharacterBody3D
                     state = State.Shield;
                 }
                 else if (is_moving) {
-    
                     state = State.Walking;
                 }
                 break;
@@ -112,6 +194,9 @@ public partial class Character : CharacterBody3D
                 }
                 else if (jump_just_pressed) {
                     state = State.InAir;
+                }
+                else if (attacked) {
+                    state = State.Attack;
                 }
                 else if (crouch_pressed) {
                     state = State.Crouch;
@@ -131,6 +216,36 @@ public partial class Character : CharacterBody3D
                 else if (shield_pressed) {
                     state = State.InAirShield;
                 }
+                else if (crouch_pressed && !stamina.IsTired) {
+                    state = State.Float;
+                }
+                else if (started_flying && !stamina.IsTired) {
+                    state = State.Flying;
+                }
+                break;
+
+            case State.Flying:
+                if (on_floor) {
+                    state = State.Idle;
+                }
+                else if (stamina.IsTired) {
+                    state = State.InAir;
+                }
+                else if (started_flying) {
+                    state = State.InAir;
+                }
+                break;
+
+            case State.Float:
+                if (on_floor) {
+                    state = State.Crouch;
+                }
+                else if (stamina.IsTired) {
+                    state = State.InAir;
+                }
+                else if (!crouch_pressed) {
+                    state = State.InAir;
+                }
                 break;
 
             case State.Crouch:
@@ -139,6 +254,9 @@ public partial class Character : CharacterBody3D
                 }
                 else if (jump_just_pressed) {
                     state = State.InAir;
+                }
+                else if (attacked) {
+                    state = State.Attack;
                 }
                 else if (shield_pressed) {
                     state = State.Shield;
@@ -154,6 +272,9 @@ public partial class Character : CharacterBody3D
                 }
                 else if (jump_just_pressed) {
                     state = State.InAirShield;
+                }
+                else if (attacked) {
+                    state = State.Attack;
                 }
                 else if (!shield_pressed) {
                     state = State.Idle;
@@ -171,6 +292,10 @@ public partial class Character : CharacterBody3D
 
             default:
                 throw new NotImplementedException();
+        }
+
+        if (state != State.Attack) {
+            last_combo = Combo.None;
         }
     }
 
@@ -208,6 +333,14 @@ public partial class Character : CharacterBody3D
 
         var is_moving = movement != Vector2.Zero;
 
+        var just_jumped = Input.IsActionJustPressed("jump");
+        var is_jumped = Input.IsActionPressed("jump");
+
+        var just_crouched = Input.IsActionJustPressed("crouch");
+        var is_crouched = Input.IsActionPressed("crouch");
+
+        var is_sprinting = Input.IsActionPressed("sprint");
+
         stamina.drainage = 0.0f;
 
         switch (state) {
@@ -217,15 +350,17 @@ public partial class Character : CharacterBody3D
 
             case State.Walking:
                 if (is_moving) {
-                    if (stamina.is_tired) {
-                        target_velocity = forward * TIRED_SPEED * movement.Length();
+                    if (stamina.IsTired) {
+                        target_velocity = root_motion;
+                        //target_velocity = forward * TIRED_SPEED * movement.Length();
                     }
-                    else if (Input.IsActionPressed("sprint")) {
+                    else if (is_sprinting) {
                         target_velocity = forward * SPRINT_SPEED;
                         stamina.drainage = SPRINT_STAMINA;
                     }
                     else {
-                        target_velocity = forward * WALK_SPEED * movement.Length();
+                        target_velocity = root_motion;
+                        //target_velocity = forward * WALK_SPEED * movement.Length();
                     }
                 }
                 else {
@@ -236,13 +371,56 @@ public partial class Character : CharacterBody3D
             case State.InAir:
                 break;
 
+            case State.Flying: {
+                var amount = Mathf.Remap(movement.Length(), 0.0f, 1.0f, FLYING_MIN_STAMINA, FLYING_MAX_STAMINA);
+                stamina.drainage = amount;
+
+                if (is_sprinting) {
+                    stamina.drainage += FLYING_SPRINT_ADDITIONAL_STAMINA;
+                }
+
+                var speed = FLYING_SPEED;
+
+                if (is_sprinting) {
+                    speed = FLYING_SPRINT_SPEED;
+                }
+
+                target_velocity = forward * speed * movement.Length();
+
+                var height_speed = FLYING_HEIGHT_SPEED;
+
+                if (is_sprinting) {
+                    height_speed = FLYING_HEIGHT_SPRINT_SPEED;
+                }
+
+                if (is_jumped) {
+                    saved_grav = height_speed;
+                }
+                else if (is_crouched) {
+                    saved_grav = -height_speed;
+                }
+                else {
+                    saved_grav = 0.0f;
+                }
+
+                break;
+            }
+
+
+            case State.Float:
+                stamina.drainage = FLOAT_STAMINA;
+                target_velocity = forward * FLOAT_SPEED * movement.Length();
+                saved_grav = Math.Max(saved_grav, MAX_FLOAT_FALL_SPEED);
+                break;
+
             case State.Crouch:
                 target_velocity = forward * CROUCH_SPEED * movement.Length();
                 break;
 
             case State.Shield: {
-                var move = forward * movement.Dot(Vector2.Up);
-                move += right * movement.Dot(Vector2.Right);
+                var move_norm = movement.Normalized();
+                var move = forward * move_norm.Dot(Vector2.Up);
+                move += right * move_norm.Dot(Vector2.Right);
                 target_velocity = move * movement.Length() * SHIELD_SPEED;
                 break;
             }
@@ -257,6 +435,9 @@ public partial class Character : CharacterBody3D
         if (Input.IsActionJustPressed("jump") && IsOnFloor()) {
             saved_grav = 10.0f;
         }
+
+        target_velocity = root_motion;
+        root_motion = Vector3.Zero;
 
         Velocity = Velocity.Lerp(target_velocity, 1.0f - (float)Math.Pow(VELOCITY_LERP_ALPHA, delta));
 
@@ -288,6 +469,8 @@ public partial class Character : CharacterBody3D
             crouching_collision.Disabled = true;
             crouching_model.Visible = false;
         }
+
+        root_motion += animation_tree.GetRootMotionPosition();
     }
 
 

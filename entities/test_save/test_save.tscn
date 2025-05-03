@@ -1,0 +1,17 @@
+[gd_scene load_steps=3 format=3 uid="uid://do5yf2mx4myx0"]
+
+[ext_resource type="Script" uid="uid://dsh7mcj41xvoi" path="res://entities/test_save/TestSave.cs" id="1_p0i1k"]
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_bclgi"]
+
+[node name="TestSave" type="RigidBody3D" groups=["Persistent"]]
+collision_layer = 0
+collision_mask = 65537
+script = ExtResource("1_p0i1k")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource("SphereShape3D_bclgi")
+
+[node name="CSGSphere3D" type="CSGSphere3D" parent="."]
+radial_segments = 32
+rings = 32
